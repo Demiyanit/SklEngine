@@ -1,0 +1,2 @@
+include - shared include dir, should be used by application
+src - source and private include dir

@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "*.asm": "asm-collection",
+        "skl.h": "c",
+        "entry.h": "c",
+        "application.h": "c",
+        "defines.h": "c",
+        "test.h": "c",
+        "vector.h": "c"
+    }
+}
