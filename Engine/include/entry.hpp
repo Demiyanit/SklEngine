@@ -6,11 +6,10 @@ extern IApplication* GetConfiguredApplication();
 
 int main() {
 	IApplication* app = GetConfiguredApplication();
-	Engine*   instance = new Engine(app);
-	
-	int ret = instance->run();
-	
+	Engine e;
+	e.Initialize(app);
+	int ret = e.Run();
+	e.Shutdown();
 	delete app;
-	delete instance;
 	return ret;
 }

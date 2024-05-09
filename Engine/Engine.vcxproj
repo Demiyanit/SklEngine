@@ -151,6 +151,8 @@
     <ClCompile Include="src\core\Engine.cpp" />
     <ClCompile Include="src\core\Input.cpp" />
     <ClCompile Include="src\platform\Win32Window.cpp" />
+    <ClCompile Include="src\renderer\OpenGLRenderer.cpp" />
+    <ClCompile Include="src\renderer\Win32GL.cpp" />
     <ClCompile Include="src\util\Event.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -160,6 +162,8 @@
     <ClInclude Include="include\core\Input.hpp" />
     <ClInclude Include="include\entry.hpp" />
     <ClInclude Include="include\platform\Window.hpp" />
+    <ClInclude Include="include\renderer\IRenderer.hpp" />
+    <ClInclude Include="include\renderer\OpenGLRenderer.hpp" />
     <ClInclude Include="include\util\Event.hpp" />
   </ItemGroup>
   <ItemGroup>

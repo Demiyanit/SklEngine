@@ -5,8 +5,8 @@
 class TestGame : public IApplication {
 public:
 	TestGame();
-	bool OnInit() override;
-	bool OnUpdate(float delta_time) override;
-	bool OnRender() override;
-	bool OnShutdown() override;
+	void OnInit() override;
+	void OnUpdate(float delta_time) override;
+	void OnRender() override;
+	void OnShutdown() override;
 };

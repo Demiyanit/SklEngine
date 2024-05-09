@@ -1,11 +1,12 @@
-#include <platform/Window.hpp>
-
 #if defined(_WIN32) && defined(_WIN64)
+#include <platform/Window.hpp>
 #include <Windows.h>
 
 #include <core/EngineEvents.hpp>
 
-Window* Window::instance = nullptr;
+void* Window::wnd_handle = nullptr;
+bool Window::shouldclose = false;
+bool Window::initialized = false;
 
 #define GET_X_LPARAM(lParam) ((int)(short)LOWORD(lParam))
 #define GET_Y_LPARAM(lParam) ((int)(short)HIWORD(lParam))
@@ -13,39 +14,7 @@ Window* Window::instance = nullptr;
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 void Window::Init(const char* name, int width, int height) {
-	if (instance) return;
-	instance = new Window(name, width, height);
-}
-
-void Window::Shutdown() {
-	if (!instance) return;
-	delete instance;
-}
-
-void Window::SetTitle(const char* title) {
-	SetWindowTextA((HWND)wnd_handle, title);
-}
-
-std::string Window::GetTitle() {
-	char title[256];
-	GetWindowTextA((HWND)wnd_handle, title, 256);
-	return std::string(title);
-}
-
-void Window::Update() {
-	MSG msg;
-	PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
-	TranslateMessage(&msg);
-	DispatchMessage(&msg);
-}
-
-glm::vec2 Window::GetRect() {
-	RECT rect = { 0, 0, 0, 0 };
-	AdjustWindowRect(&rect, GetWindowLong((HWND)wnd_handle, GWL_STYLE), FALSE);
-	return glm::vec2(rect.left, rect.top);
-}
-
-Window::Window(const char* name, int width, int height) {
+	if (Window::initialized) return;
 	WNDCLASSEXW wc;
 	wc.cbSize = sizeof(WNDCLASSEXW);
 	wc.style = CS_HREDRAW | CS_VREDRAW;
@@ -89,15 +58,36 @@ Window::Window(const char* name, int width, int height) {
 	UpdateWindow((HWND)wnd_handle);
 }
 
-Window::~Window() {
-	DestroyWindow((HWND)wnd_handle);
+void Window::Shutdown() {
+	DestroyWindow((HWND)Window::wnd_handle);
+	Window::wnd_handle = nullptr;
+	UnregisterClassW(L"SklC", GetModuleHandleW(NULL));
+}
+
+void Window::SetTitle(const char* title) {
+	SetWindowTextA((HWND)wnd_handle, title);
+}
+
+std::string Window::GetTitle() {
+	char title[256];
+	GetWindowTextA((HWND)wnd_handle, title, 256);
+	return std::string(title);
+}
+
+void Window::Update() {
+	MSG msg;
+	PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
+	TranslateMessage(&msg);
+	DispatchMessage(&msg);
+}
+
+glm::vec2 Window::GetRect() {
+	RECT rect = { 0, 0, 0, 0 };
+	AdjustWindowRect(&rect, GetWindowLong((HWND)wnd_handle, GWL_STYLE), FALSE);
+	return glm::vec2(rect.left, rect.top);
 }
 
 LRESULT WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
-	Window* window = Window::Get();
-	if (!window) {
-		return DefWindowProc(hWnd, message, wParam, lParam);
-	}
 	switch (message) {
 	case WM_PAINT: {
 		//We will handle that ourselves

@@ -5,21 +5,17 @@
 
 class Window {
 public:
-	static Window*& Get() {
-		return instance;
-	}
 
 	static void Init(const char* name, int width, int height);
 	static void Shutdown();
-	void SetTitle(const char* title);
-	std::string GetTitle();
-	void Update();
-	glm::vec2 GetRect();
-
-	void* wnd_handle = nullptr;
+	static void SetTitle(const char* title);
+	static std::string GetTitle();
+	static void Update();
+	static glm::vec2 GetRect();
+	static bool ShouldClose() { return shouldclose; }
+	static void SetShouldClose(bool should) { shouldclose = should; }
+	static void* wnd_handle;
 private:
-	Window(const char* name, int width, int height);
-	~Window();
-
-	static Window* instance;
+	static bool shouldclose;
+	static bool initialized;
 };

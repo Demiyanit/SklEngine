@@ -6,22 +6,18 @@ TestGame::TestGame() {
     height = 600;
 }
 
-bool TestGame::OnInit() {
+void TestGame::OnInit() {
     
-    return true;
 }
 
-bool TestGame::OnUpdate(float delta_time) {
+void TestGame::OnUpdate(float delta_time) {
     
-    return true;
 }
 
-bool TestGame::OnRender() {
+void TestGame::OnRender() {
     
-    return true;
 }
 
-bool TestGame::OnShutdown() {
+void TestGame::OnShutdown() {
 
-    return true;
 }
