@@ -10,4 +10,7 @@ public:
 private:
 	void InitGlew();
 	void SwapBuffers();
+	void MakeCtxCurrent();
+	void InitMain();
+	void* ctx = nullptr;
 };

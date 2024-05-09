@@ -19,11 +19,6 @@ void InitShutdownSequence(EngineCloseEvent* e) {
 	std::cout << e->message << std::endl;
 }
 
-void WindowResizeHandler(WindowResizeEvent* e) {
-	
-	std::cout << "Window resized to: " << e->width << ", " << e->height << std::endl;
-}
-
 void Engine::Initialize(IApplication* inst) {
 	Engine::application_instance = inst;
 	
@@ -32,7 +27,6 @@ void Engine::Initialize(IApplication* inst) {
 		Input::Init();
 		Engine::renderer = new OpenGLRenderer();
 		Event::Register<EngineCloseEvent>((EventCallback)InitShutdownSequence);
-		Event::Register<WindowResizeEvent>((EventCallback)WindowResizeHandler);
 	}
 	catch (std::exception e) {
 		std::cerr << "[ERROR]: Engine failed to initialize... \n" << e.what() << "\nExiting..." << std::endl;

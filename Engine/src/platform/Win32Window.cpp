@@ -15,7 +15,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 void Window::Init(const char* name, int width, int height) {
 	if (Window::initialized) return;
-	WNDCLASSEXW wc;
+	WNDCLASSEXW wc = {};
 	wc.cbSize = sizeof(WNDCLASSEXW);
 	wc.style = CS_HREDRAW | CS_VREDRAW;
 	wc.lpfnWndProc = WindowProc;
@@ -24,7 +24,7 @@ void Window::Init(const char* name, int width, int height) {
 	wc.hInstance = GetModuleHandle(NULL);
 	wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	wc.hbrBackground = (HBRUSH)GetStockObject(NULL_BRUSH);
 	wc.lpszMenuName = NULL;
 	wc.lpszClassName = L"SklC";
 	wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
@@ -109,7 +109,7 @@ LRESULT WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
 	case WM_MBUTTONUP: {
-		InputMouseButtonEvent e(wParam, (message == WM_LBUTTONDOWN || message == WM_RBUTTONDOWN || message == WM_MBUTTONDOWN));
+		InputMouseButtonEvent e((int)wParam, (message == WM_LBUTTONDOWN || message == WM_RBUTTONDOWN || message == WM_MBUTTONDOWN));
 		e.Fire();
 		return 0;
 	} break;
@@ -117,7 +117,7 @@ LRESULT WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	case WM_SYSKEYDOWN:
 	case WM_KEYUP:
 	case WM_SYSKEYUP: {
-		InputKeyEvent e(wParam, (message == WM_KEYDOWN || message == WM_SYSKEYDOWN));
+		InputKeyEvent e((int)wParam, (message == WM_KEYDOWN || message == WM_SYSKEYDOWN));
 		e.Fire();
 		return 0;
 	} break;
