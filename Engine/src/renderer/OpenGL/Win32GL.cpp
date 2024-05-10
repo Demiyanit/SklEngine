@@ -1,13 +1,11 @@
 #if defined(_WIN32) && defined(_WIN64)
 #include <stdexcept>
-
+#include <renderer/OpenGL/Init.hpp>
 #include <glew/glew.h>
 #include <glew/wglew.h>
 
 #include <platform/Window.hpp>
-#include <renderer/OpenGLRenderer.hpp>
-
-void OpenGLRenderer::InitGlew() {
+void* InitGlew() {
 	WNDCLASSEXW wc = {};
 	wc.cbSize = sizeof(WNDCLASSEXW);
 	wc.style = 0;
@@ -94,10 +92,10 @@ void OpenGLRenderer::InitGlew() {
 		throw std::runtime_error("DestroyWindow failed");
 	}
 	UnregisterClassW(L"DummyWndClass", GetModuleHandleW(NULL));
-	InitMain();
+	return InitMain();
 }
 
-void OpenGLRenderer::InitMain() {
+void* InitMain() {
 	HDC hdc = GetDC((HWND)Window::wnd_handle);
 
 	PIXELFORMATDESCRIPTOR pfd = {};
@@ -128,7 +126,7 @@ void OpenGLRenderer::InitMain() {
 		throw std::runtime_error("SetPixelFormat failed");
 	}
 
-	ctx = wglCreateContextAttribsARB(hdc, NULL, 0);
+	HGLRC ctx = wglCreateContextAttribsARB(hdc, NULL, 0);
 
 	if (ctx == NULL) {
 		throw std::runtime_error("wglCreateContextAttribsARB failed");
@@ -150,13 +148,15 @@ void OpenGLRenderer::InitMain() {
 	if (wglMakeCurrent(hdc, (HGLRC)ctx) == FALSE) {
 		throw std::runtime_error("wglMakeCurrent failed");
 	}
+
+	return ctx;
 }
 
-void OpenGLRenderer::SwapBuffers() {
+void SwapBuffers() {
 	wglSwapLayerBuffers(GetDC((HWND)Window::wnd_handle), WGL_SWAP_MAIN_PLANE);
 }
 
-void OpenGLRenderer::MakeCtxCurrent() {
+void MakeCtxCurrent(void* ctx) {
 	if (wglMakeCurrent(GetDC((HWND)Window::wnd_handle), (HGLRC)ctx) == FALSE) {
 		throw std::runtime_error("wglMakeCurrent failed");
 	}

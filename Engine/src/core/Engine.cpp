@@ -5,9 +5,8 @@
 #include <core/Engine.hpp>
 #include <platform/Window.hpp>
 #include <core/Input.hpp>
-#include <renderer/OpenGLRenderer.hpp>
+#include <renderer/Renderer.hpp>
 
-IRenderer* Engine::renderer = nullptr;
 IApplication* Engine::application_instance = nullptr;
 
 void InitShutdownSequence(EngineCloseEvent* e) {
@@ -25,8 +24,8 @@ void Engine::Initialize(IApplication* inst) {
 	try {
 		Window::Init(inst->ApplicationName.c_str(), inst->width, inst->height);
 		Input::Init();
-		Engine::renderer = new OpenGLRenderer();
-		Window::renderer_instance = renderer;
+		Renderer::Get(OpenGL);
+		Renderer::Initialize();
 		Event::Register<EngineCloseEvent>((EventCallback)InitShutdownSequence);
 	}
 	catch (std::exception e) {
@@ -42,7 +41,7 @@ try {
 		Window::Update();
 		Input::Update();
 		application_instance->OnRender();
-		renderer->Render();
+		Renderer::Render();
 	}
 	Engine::application_instance->OnShutdown();
 	

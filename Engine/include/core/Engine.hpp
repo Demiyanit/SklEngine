@@ -12,8 +12,7 @@ class IRenderer;
 class SKLC_API Engine {
 private:
 	static IApplication* application_instance;
-	static IRenderer* renderer;
-	friend class IRenderer;
+	friend class Renderer;
 	friend class Event;
 public:
 

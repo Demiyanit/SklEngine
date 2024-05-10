@@ -3,12 +3,11 @@
 #include <Windows.h>
 #include <stdexcept>
 #include <core/EngineEvents.hpp>
-#include <renderer/IRenderer.hpp>
+#include <renderer/Renderer.hpp>
 
 void* Window::wnd_handle = nullptr;
 bool Window::shouldclose = false;
 bool Window::initialized = false;
-IRenderer* Window::renderer_instance = nullptr;
 
 #define GET_X_LPARAM(lParam) ((int)(short)LOWORD(lParam))
 #define GET_Y_LPARAM(lParam) ((int)(short)HIWORD(lParam))
@@ -93,6 +92,7 @@ LRESULT WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
 	case WM_PAINT: {
 		//We will handle that ourselves
+		if (Renderer::ReRender != 0) Renderer::ReRender();
 		return 0;
 	}
 	case WM_CLOSE: {
