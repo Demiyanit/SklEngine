@@ -153,6 +153,8 @@
     <ClCompile Include="src\core\Input.cpp" />
     <ClCompile Include="src\platform\Win32Window.cpp" />
     <ClCompile Include="src\renderer\OpenGLRenderer.cpp" />
+    <ClCompile Include="src\renderer\OpenGL\OpenGLMesh.cpp" />
+    <ClCompile Include="src\renderer\OpenGL\OpenGLShader.cpp" />
     <ClCompile Include="src\renderer\Win32GL.cpp" />
     <ClCompile Include="src\util\Event.cpp" />
     <ClCompile Include="vendor\glew\glew.c" />
@@ -164,8 +166,12 @@
     <ClInclude Include="include\core\Input.hpp" />
     <ClInclude Include="include\entry.hpp" />
     <ClInclude Include="include\platform\Window.hpp" />
+    <ClInclude Include="include\renderer\IMesh.hpp" />
     <ClInclude Include="include\renderer\IRenderer.hpp" />
+    <ClInclude Include="include\renderer\IShader.hpp" />
     <ClInclude Include="include\renderer\OpenGLRenderer.hpp" />
+    <ClInclude Include="include\renderer\OpenGL\OpenGLMesh.hpp" />
+    <ClInclude Include="include\renderer\OpenGL\OpenGLSHader.hpp" />
     <ClInclude Include="include\util\Event.hpp" />
     <ClInclude Include="vendor\glew\glew.h" />
     <ClInclude Include="vendor\glew\wglew.h" />

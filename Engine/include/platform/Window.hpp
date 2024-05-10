@@ -3,6 +3,8 @@
 #include <glm/glm.hpp>
 #include <string>
 
+
+class IRenderer;
 class Window {
 public:
 
@@ -15,7 +17,9 @@ public:
 	static bool ShouldClose() { return shouldclose; }
 	static void SetShouldClose(bool should) { shouldclose = should; }
 	static void* wnd_handle;
+	static IRenderer* renderer_instance;
 private:
 	static bool shouldclose;
 	static bool initialized;
+	friend class IRenderer;
 };

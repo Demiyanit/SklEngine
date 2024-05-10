@@ -1,12 +1,14 @@
 #if defined(_WIN32) && defined(_WIN64)
 #include <platform/Window.hpp>
 #include <Windows.h>
-
+#include <stdexcept>
 #include <core/EngineEvents.hpp>
+#include <renderer/IRenderer.hpp>
 
 void* Window::wnd_handle = nullptr;
 bool Window::shouldclose = false;
 bool Window::initialized = false;
+IRenderer* Window::renderer_instance = nullptr;
 
 #define GET_X_LPARAM(lParam) ((int)(short)LOWORD(lParam))
 #define GET_Y_LPARAM(lParam) ((int)(short)HIWORD(lParam))
@@ -30,8 +32,8 @@ void Window::Init(const char* name, int width, int height) {
 	wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 
 	if (!RegisterClassExW(&wc)) {
-		EngineCloseEvent e = EngineCloseEvent(-1, "Failed to register window class");
-		return;
+		throw new std::runtime_error("Failed to register window class");
+		
 	}
 
 	DWORD style = WS_OVERLAPPEDWINDOW;
@@ -51,8 +53,8 @@ void Window::Init(const char* name, int width, int height) {
 	);
 
 	if (wnd_handle == NULL) {
-		MessageBoxA(NULL, "Window Creation Failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
-		return;
+		throw new std::runtime_error("Failed to initialize window");
+		
 	}
 	ShowWindow((HWND)wnd_handle, SW_SHOW);
 	UpdateWindow((HWND)wnd_handle);
@@ -92,7 +94,7 @@ LRESULT WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	case WM_PAINT: {
 		//We will handle that ourselves
 		return 0;
-	} break;
+	}
 	case WM_CLOSE: {
 		EngineCloseEvent e(0, "Window closed, Shutting Down the Engine");
 		e.Fire();

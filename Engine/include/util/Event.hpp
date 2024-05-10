@@ -7,7 +7,6 @@ using EventCallback = void (*)(Event*);
 
 class Event {
 public:
-
 	Event() = default;
 	virtual ~Event() = default;
 	static std::unordered_map<std::type_index, std::vector<EventCallback>> events;

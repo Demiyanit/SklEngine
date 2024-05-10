@@ -26,6 +26,7 @@ void Engine::Initialize(IApplication* inst) {
 		Window::Init(inst->ApplicationName.c_str(), inst->width, inst->height);
 		Input::Init();
 		Engine::renderer = new OpenGLRenderer();
+		Window::renderer_instance = renderer;
 		Event::Register<EngineCloseEvent>((EventCallback)InitShutdownSequence);
 	}
 	catch (std::exception e) {
