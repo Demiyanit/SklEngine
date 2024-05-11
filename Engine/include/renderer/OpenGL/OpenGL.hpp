@@ -4,11 +4,11 @@
 #include <renderer/Shader.hpp>
 #include <glm/glm.hpp>
 void OGLInit();
-void OGLRender();
+void OGLRender(glm::mat4 matrix, Shader* shader, Mesh* mesh);
 void OGLReRender();
 void OGLShutDown();
-Shader*CreateOGLShader(std::vector<std::string> paths);
-Mesh*  CreateOGLMesh(std::vector<float> vertices, std::vector<unsigned int> indices);
+Shader CreateOGLShader(std::vector<std::string> paths);
+Mesh  CreateOGLMesh(std::vector<float> vertices, std::vector<unsigned int> indices);
 void   DestroyOGLShader(Shader* shader);
 void   DestroyOGLMesh(Mesh* mesh);
 void UseOGLShader(Shader* shader);

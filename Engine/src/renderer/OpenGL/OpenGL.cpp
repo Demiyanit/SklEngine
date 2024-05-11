@@ -32,8 +32,7 @@ void ResizeCallback(WindowResizeEvent* e) {
 	OGLReRender();
 }
 
-Shader* test_shader = nullptr;
-Mesh* test_mesh = nullptr;
+
 
 void OGLInit() {
 	void* ctx = InitGlew();
@@ -42,37 +41,29 @@ void OGLInit() {
 	MakeCtxCurrent(ctx);
 	Event::Register<WindowResizeEvent>((EventCallback)ResizeCallback);
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-	test_shader = CreateOGLShader({
-		"assets/shaders/opengl/main.glslv",
-		"assets/shaders/opengl/main.glslf"
-	});
-	test_mesh = CreateOGLMesh({
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		0.5f,  0.5f, 0.0f,
-		-0.5f,  0.5f, 0.0f},{
-
-		0, 1, 2,
-		2, 3, 0
-	});
 }
 
-void OGLRender() {
-	glClear(GL_COLOR_BUFFER_BIT);
-	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-	UseOGLShader(test_shader);
-	OGLShaderSetUniformVec4(test_shader, "aColor", glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
-	RenderOGLMesh(test_mesh);
-	SwapBuffers();
+void OGLRender(glm::mat4 matrix, Shader* shader, Mesh* mesh) {
+	try {
+		glClear(GL_COLOR_BUFFER_BIT);
+		glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+		UseOGLShader(shader);
+		OGLShaderSetUniformVec4(shader, "aColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+		OGLShaderSetUniformMat4(shader, "model", matrix);
+		RenderOGLMesh(mesh);
+		SwapBuffers();
+	}
+	catch (std::exception e) {
+		std::cerr << "Exception occured in OGLRender: " << e.what() << std::endl;
+	}
 }
 
 void OGLReRender() {
-	OGLRender();
+
 }
 
 void OGLShutDown() {
-	DestroyOGLShader(test_shader);
-	DestroyOGLMesh(test_mesh);
+
 }
 
 unsigned int LoadShader(std::string path, unsigned int type) {
@@ -105,7 +96,7 @@ unsigned int LoadShader(std::string path, unsigned int type) {
 	return shader;
 }
 
-Shader* CreateOGLShader(std::vector<std::string> paths) {
+Shader CreateOGLShader(std::vector<std::string> paths) {
 	std::cout << "CreateOGLShader" << std::endl;
 	unsigned int program = glCreateProgram();
 	std::vector<unsigned int> shaders;
@@ -143,17 +134,17 @@ Shader* CreateOGLShader(std::vector<std::string> paths) {
 	}
 	ShaderInternal* data = new ShaderInternal();
 	data->id = program;
-	Shader* ret = new Shader();
-	ret->data = new ShaderInternal();
-	((ShaderInternal*)ret->data)->id = program;
+	Shader ret = Shader();
+	ret.data = new ShaderInternal();
+	((ShaderInternal*)ret.data)->id = program;
 	return ret;
 }
 
-Mesh* CreateOGLMesh(std::vector<float> vertices, std::vector<unsigned int> indices) {
+Mesh CreateOGLMesh(std::vector<float> vertices, std::vector<unsigned int> indices) {
   std::cout << "CreateOGLMesh" << std::endl;
   std::cout << "vertices: " << vertices.size() << std::endl;
   std::cout << "indices: " << indices.size() << std::endl;
-  Mesh* mesh = new Mesh();
+  Mesh mesh = Mesh();
   OpenGLMeshInternal* internal = new OpenGLMeshInternal();
 
   glGenVertexArrays(1, &internal->VAO);
@@ -174,16 +165,15 @@ Mesh* CreateOGLMesh(std::vector<float> vertices, std::vector<unsigned int> indic
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
   glBindVertexArray(0);
-  mesh->indices_count = indices.size();
-  mesh->indices = indices.data();
-  mesh->data = internal;
+  mesh.indices_count = indices.size();
+  mesh.indices = indices.data();
+  mesh.data = internal;
   return mesh;
 }
 
 void DestroyOGLShader(Shader* shader) {
 	glDeleteProgram(((ShaderInternal*)shader->data)->id);
 	delete (ShaderInternal*)shader->data;
-	delete shader;
 }
 
 void DestroyOGLMesh(Mesh* mesh) {
@@ -191,7 +181,6 @@ void DestroyOGLMesh(Mesh* mesh) {
 	glDeleteBuffers(1, &((OpenGLMeshInternal*)mesh->data)->VBO);
 	glDeleteBuffers(1, &((OpenGLMeshInternal*)mesh->data)->EBO);
 	delete mesh->data;
-	delete mesh;
 }
 
 

@@ -57,11 +57,14 @@ void Window::Init(const char* name, int width, int height) {
 	}
 	ShowWindow((HWND)wnd_handle, SW_SHOW);
 	UpdateWindow((HWND)wnd_handle);
+	GetDC((HWND)wnd_handle);
+	initialized = true;
 }
 
 void Window::Shutdown() {
 	DestroyWindow((HWND)Window::wnd_handle);
 	Window::wnd_handle = nullptr;
+	initialized = false;
 	UnregisterClassW(L"SklC", GetModuleHandleW(NULL));
 }
 

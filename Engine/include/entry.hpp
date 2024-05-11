@@ -2,6 +2,8 @@
 
 #include <core/Application.hpp>
 
+
+
 extern IApplication* GetConfiguredApplication();
 
 int main() {
@@ -11,5 +13,6 @@ int main() {
 	int ret = e.Run();
 	e.Shutdown();
 	delete app;
+	_CrtDumpMemoryLeaks();
 	return ret;
 }

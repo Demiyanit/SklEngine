@@ -39,6 +39,9 @@
     <ClCompile Include="src\renderer\OpenGL\OpenGL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\util\SceneUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\core\Engine.hpp">
@@ -84,6 +87,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\renderer\OpenGL\Init.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\SceneUtils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

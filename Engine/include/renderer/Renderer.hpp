@@ -5,8 +5,14 @@
 
 #include <renderer/Shader.hpp>
 #include <renderer/Mesh.hpp>
-
 #include <glm/glm.hpp>
+
+class RenderData {
+public:
+	Shader main_shader;
+	Mesh object_mesh;
+	glm::mat4 object_matrix;
+};
 
 enum RendererType {
 	OpenGL,
@@ -18,12 +24,12 @@ class Renderer {
 public:
 	static void Get(RendererType renderer);
 	static void (*Initialize)();
-	static void (*Render)();
+	static void (*Render)(glm::mat4 matrix, Shader* shader, Mesh* mesh);
 	static void (*ReRender)();
 	static void (*Shutdown)();
-	static Shader* (*CreateShader) (std::vector<std::string> paths);
+	static Shader  (*CreateShader) (std::vector<std::string> paths);
 	static void    (*DestroyShader)(Shader* shader);
-	static Mesh*   (*CreateMesh)   (std::vector<float> vertices, std::vector<unsigned int> indices);
+	static Mesh    (*CreateMesh)   (std::vector<float> vertices, std::vector<unsigned int> indices);
 	static void    (*DestroyMesh)  (Mesh* mesh);
 	static void  (*UseShader)  (Shader* shader);
 	static void  (*RenderMesh) (Mesh* mesh);

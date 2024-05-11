@@ -1,12 +1,12 @@
 #include <renderer/Renderer.hpp>
 #include <renderer/OpenGL/OpenGL.hpp>
 void (*Renderer::Initialize)()  =0;
-void (*Renderer::Render)()  =0;
+void (*Renderer::Render)(glm::mat4 matrix, Shader* shader, Mesh* mesh)  =0;
 void (*Renderer::ReRender)()=0;
 void (*Renderer::Shutdown)()=0;
-Shader*(*Renderer::CreateShader) (std::vector<std::string> paths)=0;
+Shader (*Renderer::CreateShader) (std::vector<std::string> paths)=0;
 void   (*Renderer::DestroyShader)(Shader* shader)=0;
-Mesh*  (*Renderer::CreateMesh)   (std::vector<float> vertices, std::vector<unsigned int> indices)=0;
+Mesh   (*Renderer::CreateMesh)   (std::vector<float> vertices, std::vector<unsigned int> indices)=0;
 void   (*Renderer::DestroyMesh)  (Mesh* mesh)=0;
 void   (*Renderer::UseShader)  (Shader* shader)=0;
 void   (*Renderer::RenderMesh) (Mesh* mesh)=0;

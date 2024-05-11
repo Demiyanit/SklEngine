@@ -88,6 +88,7 @@ void* InitGlew() {
 		throw std::runtime_error("wglDeleteContext failed");
 	}
 
+	ReleaseDC(hwnd, hdc);
 	if (DestroyWindow(hwnd) == 0) {
 		throw std::runtime_error("DestroyWindow failed");
 	}
@@ -145,21 +146,31 @@ void* InitMain() {
 		throw std::runtime_error("wglCreateContextAttribsARB failed");
 	}
 
-	if (wglMakeCurrent(hdc, (HGLRC)ctx) == FALSE) {
+	if (wglMakeCurrent(hdc, (HGLRC)0) == FALSE) {
 		throw std::runtime_error("wglMakeCurrent failed");
 	}
-
+	
 	return ctx;
 }
 
 void SwapBuffers() {
-	wglSwapLayerBuffers(GetDC((HWND)Window::wnd_handle), WGL_SWAP_MAIN_PLANE);
+	HDC dc = GetDC((HWND)Window::wnd_handle);
+	if (dc == NULL) {
+		throw std::runtime_error("GetDC failed");
+	}
+	if (SwapBuffers(dc) == FALSE) {
+		throw std::runtime_error("SwapBuffers failed: " + std::to_string(GetLastError()));
+	}
+	ReleaseDC((HWND)Window::wnd_handle, dc);
 }
 
 void MakeCtxCurrent(void* ctx) {
-	if (wglMakeCurrent(GetDC((HWND)Window::wnd_handle), (HGLRC)ctx) == FALSE) {
+	HDC dc = GetDC((HWND)Window::wnd_handle);
+	if (wglMakeCurrent(dc, (HGLRC)ctx) == FALSE) {
+		ReleaseDC((HWND)Window::wnd_handle, dc);
 		throw std::runtime_error("wglMakeCurrent failed");
 	}
+	ReleaseDC((HWND)Window::wnd_handle, dc);
 }
 
 #endif
