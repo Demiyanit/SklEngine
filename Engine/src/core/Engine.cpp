@@ -96,16 +96,23 @@ try {
 	test_obj.render_data.object_matrix = glm::mat4(1.0f);
 	test_obj.render_data.color = glm::vec4(1.0f);
 	test_obj.transform.position = glm::vec3(0.0f);
-	test_obj.transform.rotation = glm::vec3(0.0f, 90.0f, 0.0f);
+	test_obj.transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 	test_obj.transform.scale = glm::vec3(1.0f);
 	test.main.push_back(test_obj);
 
 	Camera test_cam = Camera();
 	test_cam.clear_color = glm::vec4(0.2f, 0.2f, 0.3f, 1.0f);
-	test_cam.viewport_pos = glm::vec4(0, 0, Window::GetRect().x, Window::GetRect().y);
+	test_cam.viewport_pos = glm::vec4(80.0f, 60.0f, Window::GetRect().x, Window::GetRect().y);
 	test_cam.old_viewport_pos = glm::vec4(0);
-	test_cam.transform.position = glm::vec3(0.0f, 0.0f, 60.0f);
+	test_cam.transform.position = glm::vec3(0.0f, 0.0f, 10.0f);
 	test_cam.transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	Camera test_cam2 = Camera();
+	test_cam2.clear_color = glm::vec4(0.2f, 0.2f, 0.3f, 1.0f);
+	test_cam2.viewport_pos = glm::vec4(80.0f, 60.0f, Window::GetRect().x/10.0f, Window::GetRect().y/10.0f);
+	test_cam2.old_viewport_pos = glm::vec4(0);
+	test_cam2.transform.position = glm::vec3(0.0f, 10.0f, 3.0f);
+	test_cam2.transform.rotation = glm::vec3(0.0f, -90.0f, 0.0f);
 	Engine::application_instance->OnInit();
 	while(!Window::ShouldClose()) {
 		Window::Update();
@@ -154,16 +161,28 @@ try {
 		// Rotate the game object
 		//No it is not ok cause it should rotate by 2 axis right now :/
 		//...
-		test.main[0].transform.rotation.x -= glm::radians(10.0f); // Rotate by 0.02 radians (approximately 0.6 degrees)
-		test.main[0].transform.rotation.z += glm::radians(10.0f); // Rotate by 0.02 radians (approximately 0.6 degrees)
-
+		if (Input::KeyPressed(KEY_J))
+			test.main[0].transform.rotation.x += glm::radians(10.0f); 
+		if (Input::KeyPressed(KEY_L))
+			test.main[0].transform.rotation.x -= glm::radians(10.0f); 
+		if (Input::KeyPressed(KEY_I))
+			test.main[0].transform.rotation.y += glm::radians(10.0f); 
+		if (Input::KeyPressed(KEY_K))
+			test.main[0].transform.rotation.y -= glm::radians(10.0f); 
+		if (Input::KeyPressed(KEY_B))
+			test.main[0].transform.rotation.z += glm::radians(10.0f);
+		if (Input::KeyPressed(KEY_H))
+			test.main[0].transform.rotation.z -= glm::radians(10.0f);
 		// Floor the rotation values to 360 degrees
 		test.main[0].transform.rotation.x = test.main[0].transform.rotation.x > 360.0f ? 0.0f : test.main[0].transform.rotation.x;
 		test.main[0].transform.rotation.y = test.main[0].transform.rotation.y > 360.0f ? 0.0f : test.main[0].transform.rotation.y;
 		test.main[0].transform.rotation.z = test.main[0].transform.rotation.z > 360.0f ? 0.0f : test.main[0].transform.rotation.z;
 
 		std::vector<RenderData> renderData = test.ConstructRenderData();
+		Renderer::StartRender();
 		test_cam.Render(renderData);
+		test_cam2.Render(renderData);
+		Renderer::FinishRender();
 	}
 	Engine::application_instance->OnShutdown();
 	Renderer::DestroyShader(&test_obj.render_data.main_shader);

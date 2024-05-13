@@ -59,9 +59,20 @@ glm::mat4 Camera::CalculateViewMatrix() {
 void Camera::Render(std::vector<RenderData> data) {
 	if(old_viewport_pos != viewport_pos) {
 		old_viewport_pos = viewport_pos;
+		float aspect_ratio = static_cast<float>(viewport_pos.z) / static_cast<float>(viewport_pos.w);
+		if (aspect_ratio >= 1.7) { // 16/9
+			aspect_ratio = 16.0f / 9.0f;
+		}
+		else if (aspect_ratio >= 1.6) { // 16/10
+			aspect_ratio = 16.0f / 10.0f;
+		}
+		else { // 4/3
+			aspect_ratio = 4.0f / 3.0f;
+		}
+
 		projection = glm::perspective(
 		glm::radians(44.0f), // Field of view in radians
-		viewport_pos.z / viewport_pos.w,
+		aspect_ratio,
 		0.01f, 10000.0f
 		) ;
 	}
@@ -73,22 +84,9 @@ void Camera::Render(std::vector<RenderData> data) {
 		viewport_pos.w
 	);
 	Renderer::ClearColor(this->clear_color);
-	Renderer::StartRender();
+	
 	for (RenderData& d : data) {
 		Renderer::Render(projection, view, d);
 	}
-	Renderer::FinishRender();
-}
-
-glm::mat4 Camera::CalculateCurrentMatrix() {
-	glm::mat4 world;
-	world = glm::mat4(1.0f);
-	glm::mat4 one = glm::mat4(1.0f);
-	world *= glm::rotate(one, this->transform.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-	world *= glm::rotate(one, this->transform.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-	world *= glm::rotate(one, this->transform.rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-
-	world = glm::translate(world, transform.position);
-	world = glm::inverse(world);
-	return world;
+	
 }
