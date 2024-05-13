@@ -25,9 +25,9 @@ void Scene::RenderGameObject(GameObject* gameObject, glm::mat4 parentMatrix, std
 }
 
 glm::mat4 Scene::CalculateTransformMatrix(GameObject* gameObject) {
-    glm::mat4 rotationMatrix = glm::eulerAngleXYZ(
-        glm::radians(gameObject->transform.rotation.x),
+    glm::mat4 rotationMatrix = glm::eulerAngleYXZ(
         glm::radians(gameObject->transform.rotation.y),
+        glm::radians(gameObject->transform.rotation.x),
         glm::radians(gameObject->transform.rotation.z)
     );
 
@@ -38,7 +38,7 @@ glm::mat4 Scene::CalculateTransformMatrix(GameObject* gameObject) {
         gameObject->transform.position.x, gameObject->transform.position.y, gameObject->transform.position.z, 1.0f
     );
 
-    return rotationMatrix * objectMatrix;
+    return glm::transpose(rotationMatrix * objectMatrix);
 }
 
 glm::mat4 Camera::CalculateViewMatrix() {

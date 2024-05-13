@@ -154,8 +154,8 @@ try {
 		// Rotate the game object
 		//No it is not ok cause it should rotate by 2 axis right now :/
 		//...
-		test.main[0].transform.rotation.z += glm::radians(10.0f); // Rotate by 0.02 radians (approximately 0.6 degrees)
 		test.main[0].transform.rotation.x -= glm::radians(10.0f); // Rotate by 0.02 radians (approximately 0.6 degrees)
+		test.main[0].transform.rotation.z += glm::radians(10.0f); // Rotate by 0.02 radians (approximately 0.6 degrees)
 
 		// Floor the rotation values to 360 degrees
 		test.main[0].transform.rotation.x = test.main[0].transform.rotation.x > 360.0f ? 0.0f : test.main[0].transform.rotation.x;
