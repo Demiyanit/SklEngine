@@ -45,10 +45,30 @@ void OGLInit() {
 	MakeCtxCurrent(ctx);
 	Event::Register<WindowResizeEvent>((EventCallback)ResizeCallback);
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	// set depth testing
+	glEnable(GL_DEPTH_TEST);
+
+	// set depth function
+	// GL_LESS - passes if the incoming depth value is less than the stored depth value
+	// GL_EQUAL - passes if the incoming depth value is equal to the stored depth value
+	// GL_LEQUAL - passes if the incoming depth value is less than or equal to the stored depth value
+	// GL_GREATER - passes if the incoming depth value is greater than the stored depth value
+	// GL_NOTEQUAL - passes if the incoming depth value is not equal to the stored depth value
+	// GL_GEQUAL - passes if the incoming depth value is greater than or equal to the stored depth value
+	// GL_ALWAYS - always passes
+	// GL_NEVER - never passes
+	glDepthFunc(GL_LEQUAL);
 }
 
 void OGLStartRender() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void RenderOGLMeshDebug(Mesh* mesh) {
+	glBindVertexArray(((MeshInternal*)mesh->data)->VAO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ((MeshInternal*)mesh->data)->EBO);
+	glDrawElements(GL_LINES, mesh->indices_count, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
 }
 
 void OGLRender(glm::mat4 projection, glm::mat4 view, RenderData data) {
@@ -59,6 +79,8 @@ void OGLRender(glm::mat4 projection, glm::mat4 view, RenderData data) {
 		OGLShaderSetUniformMat4(&data.main_shader, "view", view);
 		OGLShaderSetUniformMat4(&data.main_shader, "model", data.object_matrix);
 		RenderOGLMesh(&data.object_mesh);
+		OGLShaderSetUniformVec4(&data.main_shader, "aColor", glm::vec4{0.0f});
+		RenderOGLMeshDebug(&data.object_mesh);
 	}
 	catch (std::exception e) {
 		std::cerr << "Exception occurred in OGLRender: " << e.what() << std::endl;
@@ -227,6 +249,8 @@ void DestroyOGLTexture(Texture* texture)
 void UseOGLShader(Shader* shader) {
 	glUseProgram(((ShaderInternal*)shader->data)->id);
 }
+
+
 
 void RenderOGLMesh(Mesh* mesh) {
 	glBindVertexArray(((MeshInternal*)mesh->data)->VAO);

@@ -47,6 +47,7 @@ public:
 	glm::mat4 projection;
 	glm::mat4 view;
 	glm::mat4 CalculateViewMatrix();
+	glm::mat4 CalculateCurrentMatrix();
 	void Render(std::vector<RenderData> data);
 };
 

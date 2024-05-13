@@ -94,9 +94,9 @@ try {
 	test_obj.render_data.object_mesh =
 		Renderer::CreateMesh(obj.vertices, obj.indices);
 	test_obj.render_data.object_matrix = glm::mat4(1.0f);
-	test_obj.render_data.color = glm::vec4(0.0f);
+	test_obj.render_data.color = glm::vec4(1.0f);
 	test_obj.transform.position = glm::vec3(0.0f);
-	test_obj.transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+	test_obj.transform.rotation = glm::vec3(0.0f, 90.0f, 0.0f);
 	test_obj.transform.scale = glm::vec3(1.0f);
 	test.main.push_back(test_obj);
 
@@ -104,7 +104,7 @@ try {
 	test_cam.clear_color = glm::vec4(0.2f, 0.2f, 0.3f, 1.0f);
 	test_cam.viewport_pos = glm::vec4(0, 0, Window::GetRect().x, Window::GetRect().y);
 	test_cam.old_viewport_pos = glm::vec4(0);
-	test_cam.transform.position = glm::vec3(-20.0f, 0.0f, 0.0f);
+	test_cam.transform.position = glm::vec3(0.0f, 0.0f, 60.0f);
 	test_cam.transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 	Engine::application_instance->OnInit();
 	while(!Window::ShouldClose()) {
@@ -152,7 +152,10 @@ try {
 		std::cout << "Camera position: " << test_cam.transform.position.x << ", " << test_cam.transform.position.y << ", " << test_cam.transform.position.z << std::endl;
 		application_instance->OnRender();
 		// Rotate the game object
-		test.main[0].transform.rotation.x += glm::radians(10.0f); // Rotate by 0.02 radians (approximately 0.6 degrees)
+		//No it is not ok cause it should rotate by 2 axis right now :/
+		//...
+		test.main[0].transform.rotation.z += glm::radians(10.0f); // Rotate by 0.02 radians (approximately 0.6 degrees)
+		test.main[0].transform.rotation.x -= glm::radians(10.0f); // Rotate by 0.02 radians (approximately 0.6 degrees)
 
 		// Floor the rotation values to 360 degrees
 		test.main[0].transform.rotation.x = test.main[0].transform.rotation.x > 360.0f ? 0.0f : test.main[0].transform.rotation.x;

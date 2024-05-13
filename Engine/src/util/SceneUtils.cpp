@@ -25,29 +25,37 @@ void Scene::RenderGameObject(GameObject* gameObject, glm::mat4 parentMatrix, std
 }
 
 glm::mat4 Scene::CalculateTransformMatrix(GameObject* gameObject) {
-    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), gameObject->transform.position);
     glm::mat4 rotationMatrix = glm::eulerAngleXYZ(
         glm::radians(gameObject->transform.rotation.x),
         glm::radians(gameObject->transform.rotation.y),
         glm::radians(gameObject->transform.rotation.z)
     );
-    glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), gameObject->transform.scale);
-    return rotationMatrix  * scaleMatrix * translationMatrix;
+
+    glm::mat4 objectMatrix = glm::mat4(
+        gameObject->transform.scale.x, 0.0f, 0.0f, 0.0f,
+        0.0f, gameObject->transform.scale.y, 0.0f, 0.0f,
+        0.0f, 0.0f, gameObject->transform.scale.z, 0.0f,
+        gameObject->transform.position.x, gameObject->transform.position.y, gameObject->transform.position.z, 1.0f
+    );
+
+    return rotationMatrix * objectMatrix;
 }
 
 glm::mat4 Camera::CalculateViewMatrix() {
     glm::mat4 rotationMatrix = glm::eulerAngleXYZ(
-      glm::radians(this->transform.rotation.x),
-      glm::radians(this->transform.rotation.y),
-      glm::radians(this->transform.rotation.z)
+      glm::radians(-this->transform.rotation.x),
+      glm::radians(-this->transform.rotation.y),
+      glm::radians(-this->transform.rotation.z)
     );
 
     glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), -this->transform.position);
-
     glm::mat4 viewMatrix = rotationMatrix * translationMatrix;
 
     return viewMatrix;
 }
+
+
+
 void Camera::Render(std::vector<RenderData> data) {
 	if(old_viewport_pos != viewport_pos) {
 		old_viewport_pos = viewport_pos;
@@ -66,8 +74,21 @@ void Camera::Render(std::vector<RenderData> data) {
 	);
 	Renderer::ClearColor(this->clear_color);
 	Renderer::StartRender();
-	for (RenderData d : data) {
+	for (RenderData& d : data) {
 		Renderer::Render(projection, view, d);
 	}
 	Renderer::FinishRender();
+}
+
+glm::mat4 Camera::CalculateCurrentMatrix() {
+	glm::mat4 world;
+	world = glm::mat4(1.0f);
+	glm::mat4 one = glm::mat4(1.0f);
+	world *= glm::rotate(one, this->transform.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	world *= glm::rotate(one, this->transform.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	world *= glm::rotate(one, this->transform.rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+
+	world = glm::translate(world, transform.position);
+	world = glm::inverse(world);
+	return world;
 }
