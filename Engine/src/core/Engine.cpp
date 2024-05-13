@@ -104,7 +104,7 @@ try {
 	test_cam.clear_color = glm::vec4(0.2f, 0.2f, 0.3f, 1.0f);
 	test_cam.viewport_pos = glm::vec4(0, 0, Window::GetRect().x, Window::GetRect().y);
 	test_cam.old_viewport_pos = glm::vec4(0);
-	test_cam.transform.position = glm::vec3(0.0f, 0.0f, -2.0f);
+	test_cam.transform.position = glm::vec3(-20.0f, 0.0f, 0.0f);
 	test_cam.transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 	Engine::application_instance->OnInit();
 	while(!Window::ShouldClose()) {
