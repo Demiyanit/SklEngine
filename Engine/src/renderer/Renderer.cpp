@@ -10,6 +10,8 @@ Mesh (*Renderer::CreateMesh)(std::vector<float> vertices, std::vector<unsigned i
 void (*Renderer::DestroyMesh)(Mesh* mesh);
 Shader (*Renderer::CreateShader)(std::vector<std::string> paths);
 void (*Renderer::DestroyShader)(Shader* shader);
+Texture (*Renderer::CreateTexture)(std::string path);
+void (*Renderer::DestroyTexture)(Texture* texture);
 glm::mat4 Renderer::proj = glm::mat4(1.0f);
 void Renderer::Get(RendererType renderer) {
 	switch (renderer) {
@@ -24,6 +26,8 @@ void Renderer::Get(RendererType renderer) {
 		Renderer::DestroyMesh = DestroyOGLMesh;
 		Renderer::CreateShader = CreateOGLShader;
 		Renderer::DestroyShader = DestroyOGLShader;
+		Renderer::CreateTexture = CreateOGLTexture;
+		Renderer::DestroyTexture = DestroyOGLTexture;
 		break;
 	case Dx:
 		break;

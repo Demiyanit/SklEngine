@@ -12,6 +12,7 @@ class RenderData {
 public:
 	Shader main_shader;
 	Mesh object_mesh;
+	Texture tx;
 	glm::mat4 object_matrix;
 	glm::vec4 color = glm::vec4(0.0f);
 };
@@ -33,8 +34,10 @@ public:
 	static void (*FinishRender)();
 	static Shader  (*CreateShader) (std::vector<std::string> paths);
 	static void    (*DestroyShader)(Shader* shader);
+	static Texture (*CreateTexture)(std::string path);
 	static Mesh    (*CreateMesh)   (std::vector<float> vertices, std::vector<unsigned int> indices);
 	static void    (*DestroyMesh)  (Mesh* mesh);
+	static void    (*DestroyTexture)(Texture* texture);
 	
 	static glm::mat4 proj;
 };

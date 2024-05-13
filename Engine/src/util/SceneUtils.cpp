@@ -52,7 +52,7 @@ void Camera::Render(std::vector<RenderData> data) {
 	if(old_viewport_pos != viewport_pos) {
 		old_viewport_pos = viewport_pos;
 		projection = glm::perspective(
-		glm::radians(70.0f), // Field of view in radians
+		glm::radians(44.0f), // Field of view in radians
 		viewport_pos.z / viewport_pos.w,
 		0.01f, 10000.0f
 		) ;

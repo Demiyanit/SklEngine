@@ -219,6 +219,10 @@ void DestroyOGLMesh(Mesh* mesh) {
 	delete mesh->data;
 }
 
+void DestroyOGLTexture(Texture* texture)
+{
+}
+
 
 void UseOGLShader(Shader* shader) {
 	glUseProgram(((ShaderInternal*)shader->data)->id);

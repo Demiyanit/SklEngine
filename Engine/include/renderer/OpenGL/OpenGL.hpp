@@ -11,6 +11,7 @@ Mesh    CreateOGLMesh(std::vector<float> vertices, std::vector<unsigned int> ind
 Texture CreateOGLTexture(std::string path);
 void   DestroyOGLShader(Shader* shader);
 void   DestroyOGLMesh(Mesh* mesh);
+void   DestroyOGLTexture(Texture* texture);
 void UseOGLShader(Shader* shader);
 void RenderOGLMesh(Mesh* mesh);
 void OGLSetViewport(int x, int y, int width, int height);
