@@ -5,6 +5,7 @@
 
 #include <renderer/Shader.hpp>
 #include <renderer/Mesh.hpp>
+#include <renderer/Texture.hpp>
 #include <glm/glm.hpp>
 
 class RenderData {
@@ -12,6 +13,7 @@ public:
 	Shader main_shader;
 	Mesh object_mesh;
 	glm::mat4 object_matrix;
+	glm::vec4 color = glm::vec4(0.0f);
 };
 
 enum RendererType {
@@ -24,24 +26,15 @@ class Renderer {
 public:
 	static void Get(RendererType renderer);
 	static void (*Initialize)();
-	static void (*Render)(glm::mat4 matrix, Shader* shader, Mesh* mesh);
-	static void (*ReRender)();
-	static void (*Shutdown)();
+	static void (*SetViewPort)(int x, int y , int width, int height);
+	static void (*ClearColor)(glm::vec4 color);
+	static void (*StartRender)();
+	static void (*Render)(glm::mat4 projection, glm::mat4 view, RenderData data);
+	static void (*FinishRender)();
 	static Shader  (*CreateShader) (std::vector<std::string> paths);
 	static void    (*DestroyShader)(Shader* shader);
 	static Mesh    (*CreateMesh)   (std::vector<float> vertices, std::vector<unsigned int> indices);
 	static void    (*DestroyMesh)  (Mesh* mesh);
-	static void  (*UseShader)  (Shader* shader);
-	static void  (*RenderMesh) (Mesh* mesh);
-	static void (*ShaderSetUniformBool)(Shader* shader, const std::string& name, bool value);
-	static void (*ShaderSetUniformInt)(Shader* shader, const std::string& name, int value);
-	static void (*ShaderSetUniformFloat)(Shader* shader, const std::string& name, float value);
-	static void (*ShaderSetUniformVec2)(Shader* shader, const std::string& name, const glm::vec2& value);
-	static void (*ShaderSetUniformVec3)(Shader* shader, const std::string& name, const glm::vec3& value);
-	static void (*ShaderSetUniformVec4)(Shader* shader, const std::string& name, const glm::vec4& value);
-	static void (*ShaderSetUniformMat2)(Shader* shader, const std::string& name, const glm::mat2& mat);
-	static void (*ShaderSetUniformMat3)(Shader* shader, const std::string& name, const glm::mat3& mat);
-	static void (*ShaderSetUniformMat4)(Shader* shader, const std::string& name, const glm::mat4& mat);
-	friend class Shader;
-	friend class Mesh;
+	
+	static glm::mat4 proj;
 };

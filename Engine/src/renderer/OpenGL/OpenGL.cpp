@@ -11,15 +11,20 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glew/glew.h>
 #include <iostream>
+#include <util/ImageLoad.hpp>
 
 struct ShaderInternal {
 	unsigned int id;
 };
 
-struct OpenGLMeshInternal {
+struct MeshInternal {
 	unsigned int VAO;
 	unsigned int VBO;
 	unsigned int EBO;
+};
+
+struct TextureInternal {
+	unsigned int id;
 };
 
 void* InitGlew();
@@ -28,8 +33,7 @@ void MakeCtxCurrent(void* ctx);
 void InitMain();
 
 void ResizeCallback(WindowResizeEvent* e) {
-	glViewport(0, 0, e->width, e->height);
-	OGLReRender();
+	
 }
 
 
@@ -43,27 +47,26 @@ void OGLInit() {
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 }
 
-void OGLRender(glm::mat4 matrix, Shader* shader, Mesh* mesh) {
+void OGLStartRender() {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void OGLRender(glm::mat4 projection, glm::mat4 view, RenderData data) {
 	try {
-		glClear(GL_COLOR_BUFFER_BIT);
-		glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-		UseOGLShader(shader);
-		OGLShaderSetUniformVec4(shader, "aColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-		OGLShaderSetUniformMat4(shader, "model", matrix);
-		RenderOGLMesh(mesh);
-		SwapBuffers();
+		UseOGLShader(&data.main_shader);
+		OGLShaderSetUniformVec4(&data.main_shader, "aColor", data.color);
+		OGLShaderSetUniformMat4(&data.main_shader, "projection", projection);
+		OGLShaderSetUniformMat4(&data.main_shader, "view", view);
+		OGLShaderSetUniformMat4(&data.main_shader, "model", data.object_matrix);
+		RenderOGLMesh(&data.object_mesh);
 	}
 	catch (std::exception e) {
-		std::cerr << "Exception occured in OGLRender: " << e.what() << std::endl;
+		std::cerr << "Exception occurred in OGLRender: " << e.what() << std::endl;
 	}
 }
 
-void OGLReRender() {
-
-}
-
-void OGLShutDown() {
-
+void OGLFinishRender() {
+	SwapBuffers();
 }
 
 unsigned int LoadShader(std::string path, unsigned int type) {
@@ -145,7 +148,7 @@ Mesh CreateOGLMesh(std::vector<float> vertices, std::vector<unsigned int> indice
   std::cout << "vertices: " << vertices.size() << std::endl;
   std::cout << "indices: " << indices.size() << std::endl;
   Mesh mesh = Mesh();
-  OpenGLMeshInternal* internal = new OpenGLMeshInternal();
+  MeshInternal* internal = new MeshInternal();
 
   glGenVertexArrays(1, &internal->VAO);
   std::cout << "VAO: " << internal->VAO << std::endl;
@@ -171,15 +174,48 @@ Mesh CreateOGLMesh(std::vector<float> vertices, std::vector<unsigned int> indice
   return mesh;
 }
 
+Texture CreateOGLTexture(std::string path) {
+	Texture texture = Texture();
+	TextureInternal* internal = new TextureInternal();
+
+	glGenTextures(1, &internal->id);
+	glBindTexture(GL_TEXTURE_2D, internal->id);
+
+	std::vector<unsigned char> img = ImageLoader::LoadImage(path);
+	if (!img.empty()) {
+		GLenum format;
+		if (img.size() == img[0] * img[1] * 1)
+			format = GL_RED;
+		else if (img.size() == img[0] * img[1] * 3)
+			format = GL_RGB;
+		else if (img.size() == img[0] * img[1] * 4)
+			format = GL_RGBA;
+
+		glTexImage2D(GL_TEXTURE_2D, 0, format, img[0], img[1], 0, format, GL_UNSIGNED_BYTE, img.data());
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
+	else {
+		std::cout << "Failed to load texture" << std::endl;
+	}
+
+	texture.data = internal;
+	return texture;
+}
+
 void DestroyOGLShader(Shader* shader) {
 	glDeleteProgram(((ShaderInternal*)shader->data)->id);
 	delete (ShaderInternal*)shader->data;
 }
 
 void DestroyOGLMesh(Mesh* mesh) {
-	glDeleteVertexArrays(1, &((OpenGLMeshInternal*)mesh->data)->VAO);
-	glDeleteBuffers(1, &((OpenGLMeshInternal*)mesh->data)->VBO);
-	glDeleteBuffers(1, &((OpenGLMeshInternal*)mesh->data)->EBO);
+	glDeleteVertexArrays(1, &((MeshInternal*)mesh->data)->VAO);
+	glDeleteBuffers(1, &((MeshInternal*)mesh->data)->VBO);
+	glDeleteBuffers(1, &((MeshInternal*)mesh->data)->EBO);
 	delete mesh->data;
 }
 
@@ -189,10 +225,18 @@ void UseOGLShader(Shader* shader) {
 }
 
 void RenderOGLMesh(Mesh* mesh) {
-	glBindVertexArray(((OpenGLMeshInternal*)mesh->data)->VAO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ((OpenGLMeshInternal*)mesh->data)->EBO);
+	glBindVertexArray(((MeshInternal*)mesh->data)->VAO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ((MeshInternal*)mesh->data)->EBO);
 	glDrawElements(GL_TRIANGLES, mesh->indices_count, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+}
+
+void OGLSetViewport(int x, int y, int width, int height) {
+	glViewport(x, y, width, height);
+}
+
+void OGLClearColor(glm::vec4 color) {
+	glClearColor(color.r, color.g, color.b, color.a);
 }
 
 void OGLShaderSetUniformBool(Shader* shader, const std::string& name, bool value) {

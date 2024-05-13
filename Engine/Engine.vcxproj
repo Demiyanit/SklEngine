@@ -156,8 +156,10 @@
     <ClCompile Include="src\renderer\OpenGL\Win32GL.cpp" />
     <ClCompile Include="src\renderer\Renderer.cpp" />
     <ClCompile Include="src\util\Event.cpp" />
+    <ClCompile Include="src\util\ImageLoad.cpp" />
     <ClCompile Include="src\util\SceneUtils.cpp" />
     <ClCompile Include="vendor\glew\glew.c" />
+    <ClCompile Include="vendor\stb_impl.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\core\Application.hpp" />
@@ -172,10 +174,13 @@
     <ClInclude Include="include\renderer\OpenGL\OpenGL.hpp" />
     <ClInclude Include="include\renderer\Renderer.hpp" />
     <ClInclude Include="include\renderer\Shader.hpp" />
+    <ClInclude Include="include\renderer\Texture.hpp" />
     <ClInclude Include="include\util\Event.hpp" />
+    <ClInclude Include="include\util\ImageLoad.hpp" />
     <ClInclude Include="include\util\SceneUtils.hpp" />
     <ClInclude Include="vendor\glew\glew.h" />
     <ClInclude Include="vendor\glew\wglew.h" />
+    <ClInclude Include="vendor\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

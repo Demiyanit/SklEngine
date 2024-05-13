@@ -33,82 +33,136 @@ void Engine::Initialize(IApplication* inst) {
 		exit(-1);
 	}
 }
+
+#include <vector>
+#include <fstream>
+#include <sstream>
+#include <string>
+
+class Obj {
+public:
+    std::vector<float> vertices;
+    std::vector<unsigned int> indices;
+
+    bool LoadFromObjFile(const std::string& filename) {
+        std::ifstream file(filename);
+        if (!file.is_open()) {
+            return false;
+        }
+
+        std::string line;
+        while (std::getline(file, line)) {
+            std::istringstream iss(line);
+            std::string prefix;
+            iss >> prefix;
+
+            if (prefix == "v") {
+                float x, y, z;
+                iss >> x >> y >> z;
+                vertices.push_back(x);
+                vertices.push_back(y);
+                vertices.push_back(z);
+            }
+            else if (prefix == "f") {
+                std::string vertexIndices[3];
+                iss >> vertexIndices[0] >> vertexIndices[1] >> vertexIndices[2];
+
+                for (int i = 0; i < 3; ++i) {
+                    std::size_t pos = vertexIndices[i].find("/");
+                    vertexIndices[i] = vertexIndices[i].substr(0, pos);
+                    unsigned int index = std::stoi(vertexIndices[i]) - 1;
+                    indices.push_back(index);
+                }
+            }
+        }
+
+        return true;
+    }
+};
+
 Scene test = Scene();
 int Engine::Run() {
 try {
+    Obj obj;
+    obj.LoadFromObjFile("../../assets/test.obj");
 	GameObject test_obj;
-	test_obj.render_data;
-	test_obj.render_data.main_shader = Renderer::CreateShader({ "assets/shaders/opengl/main.glslv","assets/shaders/opengl/main.glslf" });
-	std::vector<float> vertices = {
-    // Front face
-    -0.5f, -0.5f,  0.5f,   // 0
-     0.5f, -0.5f,  0.5f,   // 1
-     0.5f,  0.5f,  0.5f,   // 2
-    -0.5f,  0.5f,  0.5f,   // 3
+	test_obj.render_data.main_shader = 
+		Renderer::CreateShader
+		({  "../../assets/shaders/opengl/main.glslv",
+			"../../assets/shaders/opengl/main.glslf"  });
 
-    // Back face
-    -0.5f, -0.5f, -0.5f,  // 4
-     0.5f, -0.5f, -0.5f,  // 5
-     0.5f,  0.5f, -0.5f,  // 6
-    -0.5f,  0.5f, -0.5f,  // 7
-
-    // Right face
-     0.5f, -0.5f,  0.5f,   // 1
-     0.5f, -0.5f, -0.5f,   // 5
-     0.5f,  0.5f, -0.5f,   // 6
-     0.5f,  0.5f,  0.5f,   // 2
-
-    // Left face
-    -0.5f, -0.5f,  0.5f,   // 0
-    -0.5f, -0.5f, -0.5f,   // 4
-    -0.5f,  0.5f, -0.5f,   // 7
-    -0.5f,  0.5f,  0.5f,   // 3
-
-    // Top face
-    -0.5f,  0.5f,  0.5f,   // 3
-     0.5f,  0.5f,  0.5f,   // 2
-     0.5f,  0.5f, -0.5f,   // 6
-    -0.5f,  0.5f, -0.5f,   // 7
-
-    // Bottom face
-    -0.5f, -0.5f,  0.5f,   // 0
-     0.5f, -0.5f,  0.5f,   // 1
-     0.5f, -0.5f, -0.5f,   // 5
-    -0.5f, -0.5f, -0.5f,   // 4
-};
-
-std::vector<unsigned int> indices = {
-    0, 1, 2, 2, 3, 0,  // Front face
-    4, 5, 6, 6, 7, 4,  // Back face
-    8, 9, 10, 10, 11, 8,  // Right face
-    12, 13, 14, 14, 15, 12,  // Left face
-    16, 17, 18, 18, 19, 16,  // Top face
-    20, 21, 22, 22, 23, 20   // Bottom face
-};
-
-test_obj.render_data.object_mesh = Renderer::CreateMesh(vertices, indices);
-
+	test_obj.render_data.object_mesh =
+		Renderer::CreateMesh(obj.vertices, obj.indices);
 	test_obj.render_data.object_matrix = glm::mat4(1.0f);
+	test_obj.render_data.color = glm::vec4(0.0f);
 	test_obj.transform.position = glm::vec3(0.0f);
-	test_obj.transform.rotation = glm::vec3(0.0f, 50.0f, 45.0f);
+	test_obj.transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 	test_obj.transform.scale = glm::vec3(1.0f);
 	test.main.push_back(test_obj);
+
+	Camera test_cam = Camera();
+	test_cam.clear_color = glm::vec4(0.2f, 0.2f, 0.3f, 1.0f);
+	test_cam.viewport_pos = glm::vec4(0, 0, Window::GetRect().x, Window::GetRect().y);
+	test_cam.old_viewport_pos = glm::vec4(0);
+	test_cam.transform.position = glm::vec3(0.0f, 0.0f, -2.0f);
+	test_cam.transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 	Engine::application_instance->OnInit();
 	while(!Window::ShouldClose()) {
 		Window::Update();
 		Input::Update();
+		if (Input::KeyPressed(KEY_ESCAPE))
+			Window::SetShouldClose(true);
+		// Move the camera with WASD
+		if (Input::KeyPressed(KEY_W)) {
+			glm::mat4 iv = glm::inverse(test_cam.view);
+			glm::vec3 forward = normalize(glm::vec3(iv[2]));
+
+			test_cam.transform.position -= forward * 1.0f;
+		}
+		if(Input::KeyPressed(KEY_S)){
+			glm::mat4 iv = glm::inverse(test_cam.view);
+			glm::vec3 forward = normalize(glm::vec3(iv[2]));
+
+			test_cam.transform.position += forward * 1.0f;
+		}
+		if(Input::KeyPressed(KEY_A)) {
+			glm::mat4 iv = glm::inverse(test_cam.view);
+			glm::vec3 right = normalize(glm::vec3(iv[0]));
+			test_cam.transform.position -= right * 1.0f;
+		}
+		if(Input::KeyPressed(KEY_D)) {
+			glm::mat4 iv = glm::inverse(test_cam.view);
+			glm::vec3 right = normalize(glm::vec3(iv[0]));
+			test_cam.transform.position += right * 1.0f;
+		}
+		// Rotate the camera with arrow keys
+		if(Input::KeyPressed(KEY_UP))
+			test_cam.transform.rotation.x += 1.0f;
+		if(Input::KeyPressed(KEY_DOWN))
+			test_cam.transform.rotation.x -= 1.0f;
+		if(Input::KeyPressed(KEY_LEFT))
+			test_cam.transform.rotation.y += 1.0f;
+		if(Input::KeyPressed(KEY_RIGHT))
+			test_cam.transform.rotation.y -= 1.0f;
+		if (Input::KeyPressed(KEY_SPACE))
+			test_cam.transform.position.y += 1.0f;
+		if (Input::KeyPressed(KEY_SHIFT))
+			test_cam.transform.position.y -= 1.0f;
+		// Debug output camera position
+		std::cout << "Camera position: " << test_cam.transform.position.x << ", " << test_cam.transform.position.y << ", " << test_cam.transform.position.z << std::endl;
 		application_instance->OnRender();
 		// Rotate the game object
-		test.main[0].transform.rotation.x += 0.001f; // Rotate by 0.01 radians (approximately 0.6 degrees)
-		test.main[0].transform.rotation.y += 0.001f; // Rotate by 0.01 radians (approximately 0.6 degrees)
-		test.main[0].transform.rotation.z += 0.001f; // Rotate by 0.01 radians (approximately 0.6 degrees)
+		test.main[0].transform.rotation.x += 0.005f; // Rotate by 0.01 radians (approximately 0.6 degrees)
+		test.main[0].transform.rotation.y += 0.005f; // Rotate by 0.01 radians (approximately 0.6 degrees)
+		test.main[0].transform.rotation.z += 0.005f; // Rotate by 0.01 radians (approximately 0.6 degrees)
 
 		// Floor the rotation values to 360 degrees
 		test.main[0].transform.rotation.x = test.main[0].transform.rotation.x > 360.0f ? 0.0f : test.main[0].transform.rotation.x;
 		test.main[0].transform.rotation.y = test.main[0].transform.rotation.y > 360.0f ? 0.0f : test.main[0].transform.rotation.y;
 		test.main[0].transform.rotation.z = test.main[0].transform.rotation.z > 360.0f ? 0.0f : test.main[0].transform.rotation.z;
 
-		test.Render();
+		std::vector<RenderData> renderData = test.ConstructRenderData();
+		test_cam.Render(renderData);
 	}
 	Engine::application_instance->OnShutdown();
 	Renderer::DestroyShader(&test_obj.render_data.main_shader);

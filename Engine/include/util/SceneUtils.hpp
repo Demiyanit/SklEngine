@@ -18,11 +18,14 @@ public:
 class Component {
 public:
 	std::string name;
+	std::string tag;
 	//The game object this transform is attached to
-	GameObject* obj;
+	GameObject* parent;
 	//Same here
 	Transform* tr;
 	std::any data;
+	bool Callable;
+	bool Renderable;
 };
 
 class GameObject {
@@ -35,12 +38,24 @@ public:
 	std::vector<Component> components;
 };
 
+class Camera : Component {
+public:
+	Transform transform;
+	glm::vec4 clear_color;
+	glm::vec4 viewport_pos;
+	glm::vec4 old_viewport_pos;
+	glm::mat4 projection;
+	glm::mat4 view;
+	glm::mat4 CalculateViewMatrix();
+	void Render(std::vector<RenderData> data);
+};
+
 class Scene {
 public:
 	std::string name;
-	void Render();
-	glm::mat4 GetParentMatrix(GameObject* parent);
-	void RenderGameObject(GameObject* gameObject, glm::mat4 parentMatrix);
+	std::vector<RenderData> ConstructRenderData();
+	void RenderGameObject(GameObject* gameObject, glm::mat4 parentMatrix, std::vector<RenderData>& renderData);
 	glm::mat4 CalculateTransformMatrix(GameObject* gameObject);
 	std::vector<GameObject> main;
+	std::vector<Component> scene_components;
 };

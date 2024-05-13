@@ -1,18 +1,20 @@
 #pragma once
 
-#include <renderer/Mesh.hpp>
-#include <renderer/Shader.hpp>
+#include <renderer/Renderer.hpp>
 #include <glm/glm.hpp>
 void OGLInit();
-void OGLRender(glm::mat4 matrix, Shader* shader, Mesh* mesh);
-void OGLReRender();
-void OGLShutDown();
-Shader CreateOGLShader(std::vector<std::string> paths);
-Mesh  CreateOGLMesh(std::vector<float> vertices, std::vector<unsigned int> indices);
+void OGLStartRender();
+void OGLRender(glm::mat4 projection, glm::mat4 view, RenderData data);
+void OGLFinishRender();
+Shader  CreateOGLShader(std::vector<std::string> paths);
+Mesh    CreateOGLMesh(std::vector<float> vertices, std::vector<unsigned int> indices);
+Texture CreateOGLTexture(std::string path);
 void   DestroyOGLShader(Shader* shader);
 void   DestroyOGLMesh(Mesh* mesh);
 void UseOGLShader(Shader* shader);
 void RenderOGLMesh(Mesh* mesh);
+void OGLSetViewport(int x, int y, int width, int height);
+void OGLClearColor(glm::vec4 color);
 void OGLShaderSetUniformBool(Shader* shader, const std::string& name, bool value);
 void OGLShaderSetUniformInt(Shader* shader, const std::string& name, int value);
 void OGLShaderSetUniformFloat(Shader* shader, const std::string& name, float value);

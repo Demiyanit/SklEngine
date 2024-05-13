@@ -3,51 +3,67 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
-void Scene::Render() {
+std::vector<RenderData> Scene::ConstructRenderData() {
+	std::vector<RenderData> renderData;
 	for (GameObject gameObject : this->main) {
-		RenderGameObject(&gameObject, glm::mat4(1.0f)); // Start with an identity matrix for the root object
+		RenderGameObject(&gameObject, glm::mat4(1.0f), renderData);
 	}
+	return renderData;
 }
 
-void Scene::RenderGameObject(GameObject* gameObject, glm::mat4 parentMatrix) {
+void Scene::RenderGameObject(GameObject* gameObject, glm::mat4 parentMatrix, std::vector<RenderData>& renderData) {
 	// Calculate the model matrix for the current game object
-	glm::mat4 modelMatrix = parentMatrix * CalculateTransformMatrix(gameObject);
+	gameObject->render_data.object_matrix = parentMatrix * CalculateTransformMatrix(gameObject);
 
-	// Check if the gameObject has a parent
-	if (gameObject->parent != nullptr) {
-		// Get the parent matrix from the parent gameObject
-		glm::mat4 parentMatrix = GetParentMatrix(gameObject->parent);
-		modelMatrix = parentMatrix * CalculateTransformMatrix(gameObject);
-	}
-
-	// Render the current game object using the Renderer
-	Renderer::Render(modelMatrix, &gameObject->render_data.main_shader, &gameObject->render_data.object_mesh);
+	// Add the render data to the render data vector
+	renderData.push_back(gameObject->render_data);
 
 	// Recursively render children of the current game object
 	for (GameObject child : gameObject->children) {
-		RenderGameObject(&child, modelMatrix);
+		RenderGameObject(&child, gameObject->render_data.object_matrix, renderData);
 	}
 }
 
 glm::mat4 Scene::CalculateTransformMatrix(GameObject* gameObject) {
-
-	glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), gameObject->transform.position);
-	translationMatrix = glm::rotate(translationMatrix,  gameObject->transform.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-	translationMatrix = glm::rotate(translationMatrix,  gameObject->transform.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-	translationMatrix = glm::rotate(translationMatrix,  gameObject->transform.rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	translationMatrix = glm::scale(translationMatrix, gameObject->transform.scale);
-
-	return translationMatrix;
+    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), gameObject->transform.position);
+    glm::mat4 rotationMatrix = glm::eulerAngleXYZ(
+        glm::radians(gameObject->transform.rotation.x),
+        glm::radians(gameObject->transform.rotation.y),
+        glm::radians(gameObject->transform.rotation.z)
+    );
+    glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), gameObject->transform.scale);
+    return translationMatrix * rotationMatrix * scaleMatrix;
 }
 
-glm::mat4 Scene::GetParentMatrix(GameObject* parent) {
-	// Check if the parent has a parent
-	if (parent->parent != nullptr) {
-		// Get the parent matrix from the parent's parent
-		glm::mat4 parentMatrix = GetParentMatrix(parent->parent);
-		return parentMatrix * CalculateTransformMatrix(parent);
-	} else {
-		// No parent, return the identity matrix
-		return glm::mat4(1.0f);
+glm::mat4 Camera::CalculateViewMatrix() {
+	glm::vec3 direction;
+	direction.x = cos(glm::radians(this->transform.rotation.x)) * cos(glm::radians(this->transform.rotation.y));
+	direction.y = sin(glm::radians(this->transform.rotation.y));
+	direction.z = sin(glm::radians(this->transform.rotation.x)) * cos(glm::radians(this->transform.rotation.y));
+	direction = glm::normalize(direction);
+	return glm::lookAt(this->transform.position, this->transform.position + direction, glm::vec3(0.0f, 1.0f, 0.0f));
+}
+
+void Camera::Render(std::vector<RenderData> data) {
+	if(old_viewport_pos != viewport_pos) {
+		old_viewport_pos = viewport_pos;
+		projection = glm::perspective(
+		glm::radians(90.0f), // Field of view in radians
+		viewport_pos.z / viewport_pos.w,
+		0.1f, 1000.0f
+		) ;
 	}
+	view = CalculateViewMatrix();
+	Renderer::SetViewPort(
+		viewport_pos.x, 
+		viewport_pos.y, 
+		viewport_pos.z, 
+		viewport_pos.w
+	);
+	Renderer::ClearColor(this->clear_color);
+	Renderer::StartRender();
+	for (RenderData d : data) {
+		Renderer::Render(projection, view, d);
+	}
+	Renderer::FinishRender();
 }

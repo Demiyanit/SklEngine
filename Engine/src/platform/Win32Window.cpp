@@ -94,8 +94,6 @@ glm::vec2 Window::GetRect() {
 LRESULT WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
 	case WM_PAINT: {
-		//We will handle that ourselves
-		if (Renderer::ReRender != 0) Renderer::ReRender();
 		return 0;
 	}
 	case WM_CLOSE: {
