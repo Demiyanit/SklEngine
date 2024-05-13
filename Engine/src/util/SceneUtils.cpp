@@ -32,25 +32,29 @@ glm::mat4 Scene::CalculateTransformMatrix(GameObject* gameObject) {
         glm::radians(gameObject->transform.rotation.z)
     );
     glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), gameObject->transform.scale);
-    return translationMatrix * rotationMatrix * scaleMatrix;
+    return rotationMatrix  * scaleMatrix * translationMatrix;
 }
 
 glm::mat4 Camera::CalculateViewMatrix() {
-	glm::vec3 direction;
-	direction.x = cos(glm::radians(this->transform.rotation.x)) * cos(glm::radians(this->transform.rotation.y));
-	direction.y = sin(glm::radians(this->transform.rotation.y));
-	direction.z = sin(glm::radians(this->transform.rotation.x)) * cos(glm::radians(this->transform.rotation.y));
-	direction = glm::normalize(direction);
-	return glm::lookAt(this->transform.position, this->transform.position + direction, glm::vec3(0.0f, 1.0f, 0.0f));
-}
+    glm::mat4 rotationMatrix = glm::eulerAngleXYZ(
+      glm::radians(this->transform.rotation.x),
+      glm::radians(this->transform.rotation.y),
+      glm::radians(this->transform.rotation.z)
+    );
 
+    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), -this->transform.position);
+
+    glm::mat4 viewMatrix = rotationMatrix * translationMatrix;
+
+    return viewMatrix;
+}
 void Camera::Render(std::vector<RenderData> data) {
 	if(old_viewport_pos != viewport_pos) {
 		old_viewport_pos = viewport_pos;
 		projection = glm::perspective(
-		glm::radians(90.0f), // Field of view in radians
+		glm::radians(70.0f), // Field of view in radians
 		viewport_pos.z / viewport_pos.w,
-		0.1f, 1000.0f
+		0.01f, 10000.0f
 		) ;
 	}
 	view = CalculateViewMatrix();

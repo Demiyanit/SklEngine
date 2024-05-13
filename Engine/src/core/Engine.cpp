@@ -152,9 +152,7 @@ try {
 		std::cout << "Camera position: " << test_cam.transform.position.x << ", " << test_cam.transform.position.y << ", " << test_cam.transform.position.z << std::endl;
 		application_instance->OnRender();
 		// Rotate the game object
-		test.main[0].transform.rotation.x += 0.005f; // Rotate by 0.01 radians (approximately 0.6 degrees)
-		test.main[0].transform.rotation.y += 0.005f; // Rotate by 0.01 radians (approximately 0.6 degrees)
-		test.main[0].transform.rotation.z += 0.005f; // Rotate by 0.01 radians (approximately 0.6 degrees)
+		test.main[0].transform.rotation.x += glm::radians(10.0f); // Rotate by 0.02 radians (approximately 0.6 degrees)
 
 		// Floor the rotation values to 360 degrees
 		test.main[0].transform.rotation.x = test.main[0].transform.rotation.x > 360.0f ? 0.0f : test.main[0].transform.rotation.x;
