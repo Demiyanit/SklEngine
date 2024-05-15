@@ -68,7 +68,7 @@ public:
 	static Scene  Load   (std::string path);
 	static Scene* LoadPTR(std::string path);
 	std::vector<GameObject> main;
-	std::vector<Component> scene_components;
+	std::vector<std::shared_ptr<Component>> scene_components;
 private:
 	void RenderGameObject(GameObject* gameObject, glm::mat4 parentMatrix, std::vector<RenderData>& renderData);
 	glm::mat4 CalculateTransformMatrix(GameObject* gameObject);

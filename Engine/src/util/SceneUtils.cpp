@@ -62,9 +62,9 @@ void Scene::Save(std::string path) {
 		object.Save(&objectNode, &sceneNode);
 	}
 	auto componentsNode = sceneNode.append_child("Components");
-	for (const auto& component : this->scene_components) {
+	for (const auto component : this->scene_components) {
 		auto componentNode = componentsNode.append_child("Component");
-  		component->Save(&componentNode, scene_node);
+  		component->Save(&componentNode, &sceneNode);
 	}
 	doc.save_file(path.c_str());
 }
