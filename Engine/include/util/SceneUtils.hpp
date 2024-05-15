@@ -37,8 +37,9 @@ public:
 	bool isActive = true;
 	std::string tag;
 	std::string name;
-	std::vector<GameObject> children;
-	std::vector<Component> components;
+	//Both of them should store allocated instances for virtual shit
+	std::vector<GameObject*> children;
+	std::vector<Component *> components;
 
 	void Save(pugi::xml_node* node, pugi::xml_node* scene_node) const;
 private:
