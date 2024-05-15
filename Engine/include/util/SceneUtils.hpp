@@ -17,15 +17,16 @@ public:
 
 class Component {
 public:
+	GameObject* parent;
+	Transform transform;
+	bool isActive = true;
 	std::string name;
 	std::string tag;
-	//The game object this transform is attached to
-	GameObject* parent;
-	//Same here
-	Transform* tr;
 	std::any data;
-	bool Callable;
-	bool Renderable;
+};
+
+namespace pugi {
+	class xml_node;
 };
 
 class GameObject {
@@ -33,12 +34,18 @@ public:
 	GameObject* parent;
 	RenderData render_data;
 	Transform transform;
+	bool isActive = true;
+	std::string tag;
 	std::string name;
 	std::vector<GameObject> children;
 	std::vector<Component> components;
+
+	void Save(pugi::xml_node* node, pugi::xml_node* scene_node) const;
+private:
+	friend class Scene;
 };
 
-class Camera : Component {
+class Camera {
 public:
 	Transform transform;
 	glm::vec4 clear_color;
@@ -47,7 +54,6 @@ public:
 	glm::mat4 projection;
 	glm::mat4 view;
 	glm::mat4 CalculateViewMatrix();
-	glm::mat4 CalculateCurrentMatrix();
 	void Render(std::vector<RenderData> data);
 };
 
@@ -55,8 +61,13 @@ class Scene {
 public:
 	std::string name;
 	std::vector<RenderData> ConstructRenderData();
-	void RenderGameObject(GameObject* gameObject, glm::mat4 parentMatrix, std::vector<RenderData>& renderData);
-	glm::mat4 CalculateTransformMatrix(GameObject* gameObject);
+
+	void Save(std::string path);
+	static Scene  Load   (std::string path);
+	static Scene* LoadPTR(std::string path);
 	std::vector<GameObject> main;
 	std::vector<Component> scene_components;
+private:
+	void RenderGameObject(GameObject* gameObject, glm::mat4 parentMatrix, std::vector<RenderData>& renderData);
+	glm::mat4 CalculateTransformMatrix(GameObject* gameObject);
 };

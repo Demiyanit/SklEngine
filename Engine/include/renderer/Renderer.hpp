@@ -10,9 +10,9 @@
 
 class RenderData {
 public:
-	Shader main_shader;
-	Mesh object_mesh;
-	Texture tx;
+	Shader* main_shader;
+	Mesh*   object_mesh;
+	Texture*tx;
 	glm::mat4 object_matrix;
 	glm::vec4 color = glm::vec4(0.0f);
 };

@@ -91,6 +91,25 @@ glm::vec2 Window::GetRect() {
 	return glm::vec2(rect.left, rect.top);
 }
 
+void Window::LockCursor(bool lock) {
+	if (lock) {
+		RECT rect;
+		GetClientRect((HWND)wnd_handle, &rect);
+		POINT p = { rect.left/2.0f, rect.top/2.0f };
+		ClientToScreen((HWND)wnd_handle, &p);
+		SetCursorPos(p.x, p.y);
+		RECT r = { 1, 1, 1, 1 };
+		ClipCursor(&r);
+		SetCapture((HWND)wnd_handle);
+		ShowCursor(false);
+	}
+	else {
+		ReleaseCapture();
+		ClipCursor(NULL);
+		ShowCursor(true);
+	}
+}
+
 LRESULT WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
 	case WM_PAINT: {

@@ -33,8 +33,13 @@ void Input::Init() {
 }
 
 void Input::Update() {
+	static glm::vec2 old_mousedelta = glm::vec2{ 0.0f };
 	memcpy(prev_keys, keys, KEYS_MAX_KEYS * sizeof(bool));
 	memcpy(prev_buttons, buttons, MOUSE_MAX_BUTTONS * sizeof(bool));
+	if (old_mousedelta == Input::mouse_delta) {
+		mouse_delta = glm::vec2{ 0 };
+	}
+	old_mousedelta = mouse_delta;
 }
 
 bool Input::KeyPressed(Keys key) {

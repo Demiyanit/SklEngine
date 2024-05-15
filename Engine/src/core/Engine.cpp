@@ -86,13 +86,17 @@ try {
     Obj obj;
     obj.LoadFromObjFile("../../assets/test.obj");
 	GameObject test_obj;
-	test_obj.render_data.main_shader = 
-		Renderer::CreateShader
-		({  "../../assets/shaders/opengl/main.glslv",
-			"../../assets/shaders/opengl/main.glslf"  });
+	Shader* sh = new Shader();
+	*sh = Renderer::CreateShader
+	({ "../../assets/shaders/opengl/main.glslv",
+		"../../assets/shaders/opengl/main.glslf" });
+	test_obj.render_data.main_shader = sh;
+	
+	Mesh* mh = new Mesh();
+	*mh = Renderer::CreateMesh(obj.vertices, obj.indices);
 
-	test_obj.render_data.object_mesh =
-		Renderer::CreateMesh(obj.vertices, obj.indices);
+	test_obj.render_data.object_mesh = mh;
+		
 	test_obj.render_data.object_matrix = glm::mat4(1.0f);
 	test_obj.render_data.color = glm::vec4(1.0f);
 	test_obj.transform.position = glm::vec3(0.0f);
@@ -106,13 +110,6 @@ try {
 	test_cam.old_viewport_pos = glm::vec4(0);
 	test_cam.transform.position = glm::vec3(0.0f, 0.0f, 10.0f);
 	test_cam.transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-
-	Camera test_cam2 = Camera();
-	test_cam2.clear_color = glm::vec4(0.2f, 0.2f, 0.3f, 1.0f);
-	test_cam2.viewport_pos = glm::vec4(80.0f, 60.0f, Window::GetRect().x/10.0f, Window::GetRect().y/10.0f);
-	test_cam2.old_viewport_pos = glm::vec4(0);
-	test_cam2.transform.position = glm::vec3(0.0f, 10.0f, 3.0f);
-	test_cam2.transform.rotation = glm::vec3(0.0f, -90.0f, 0.0f);
 	Engine::application_instance->OnInit();
 	while(!Window::ShouldClose()) {
 		Window::Update();
@@ -142,25 +139,19 @@ try {
 			glm::vec3 right = normalize(glm::vec3(iv[0]));
 			test_cam.transform.position += right * 1.0f;
 		}
-		// Rotate the camera with arrow keys
-		if(Input::KeyPressed(KEY_UP))
-			test_cam.transform.rotation.x += 1.0f;
-		if(Input::KeyPressed(KEY_DOWN))
-			test_cam.transform.rotation.x -= 1.0f;
-		if(Input::KeyPressed(KEY_LEFT))
-			test_cam.transform.rotation.y += 1.0f;
-		if(Input::KeyPressed(KEY_RIGHT))
-			test_cam.transform.rotation.y -= 1.0f;
-		if (Input::KeyPressed(KEY_SPACE))
-			test_cam.transform.position.y += 1.0f;
-		if (Input::KeyPressed(KEY_SHIFT))
-			test_cam.transform.position.y -= 1.0f;
-		// Debug output camera position
-		std::cout << "Camera position: " << test_cam.transform.position.x << ", " << test_cam.transform.position.y << ", " << test_cam.transform.position.z << std::endl;
+		
+		static bool locked = true;
+		
+		// Track mouse movement
+		double xoffset = Input::mouse_delta.x;
+		double yoffset = Input::mouse_delta.y;
+		if (locked) {
+			test_cam.transform.rotation.x -= (float)yoffset * 0.1f;
+			test_cam.transform.rotation.y -= (float)xoffset * 0.1f;
+		}
+		
 		application_instance->OnRender();
-		// Rotate the game object
-		//No it is not ok cause it should rotate by 2 axis right now :/
-		//...
+		
 		if (Input::KeyPressed(KEY_J))
 			test.main[0].transform.rotation.x += glm::radians(10.0f); 
 		if (Input::KeyPressed(KEY_L))
@@ -181,12 +172,13 @@ try {
 		std::vector<RenderData> renderData = test.ConstructRenderData();
 		Renderer::StartRender();
 		test_cam.Render(renderData);
-		test_cam2.Render(renderData);
 		Renderer::FinishRender();
 	}
 	Engine::application_instance->OnShutdown();
-	Renderer::DestroyShader(&test_obj.render_data.main_shader);
-	Renderer::DestroyMesh(&test_obj.render_data.object_mesh);
+	Renderer::DestroyShader(test_obj.render_data.main_shader);
+	Renderer::DestroyMesh(test_obj.render_data.object_mesh);
+	delete mh;
+	delete sh;
 }
 catch (std::exception e) {
 	std::cerr << "[ERROR]: Engine failed to update...\n" << e.what() << "\n Shutting down..." << std::endl;

@@ -16,6 +16,8 @@ public:
 	static glm::vec2 GetRect();
 	static bool ShouldClose() { return shouldclose; }
 	static void SetShouldClose(bool should) { shouldclose = should; }
+	static void LockCursor(bool lock);
+
 	static void* wnd_handle;
 private:
 	static bool shouldclose;

@@ -159,6 +159,7 @@
     <ClCompile Include="src\util\ImageLoad.cpp" />
     <ClCompile Include="src\util\SceneUtils.cpp" />
     <ClCompile Include="vendor\glew\glew.c" />
+    <ClCompile Include="vendor\pugixml\pugixml.cpp" />
     <ClCompile Include="vendor\stb_impl.c" />
   </ItemGroup>
   <ItemGroup>
@@ -180,6 +181,8 @@
     <ClInclude Include="include\util\SceneUtils.hpp" />
     <ClInclude Include="vendor\glew\glew.h" />
     <ClInclude Include="vendor\glew\wglew.h" />
+    <ClInclude Include="vendor\pugixml\pugiconfig.hpp" />
+    <ClInclude Include="vendor\pugixml\pugixml.hpp" />
     <ClInclude Include="vendor\stb_image.h" />
   </ItemGroup>
   <ItemGroup>

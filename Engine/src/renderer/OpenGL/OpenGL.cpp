@@ -73,14 +73,14 @@ void RenderOGLMeshDebug(Mesh* mesh) {
 
 void OGLRender(glm::mat4 projection, glm::mat4 view, RenderData data) {
 	try {
-		UseOGLShader(&data.main_shader);
-		OGLShaderSetUniformVec4(&data.main_shader, "aColor", data.color);
-		OGLShaderSetUniformMat4(&data.main_shader, "projection", projection);
-		OGLShaderSetUniformMat4(&data.main_shader, "view", view);
-		OGLShaderSetUniformMat4(&data.main_shader, "model", data.object_matrix);
-		RenderOGLMesh(&data.object_mesh);
-		OGLShaderSetUniformVec4(&data.main_shader, "aColor", glm::vec4{0.0f});
-		RenderOGLMeshDebug(&data.object_mesh);
+		UseOGLShader(data.main_shader);
+		OGLShaderSetUniformVec4(data.main_shader, "aColor", data.color);
+		OGLShaderSetUniformMat4(data.main_shader, "projection", projection);
+		OGLShaderSetUniformMat4(data.main_shader, "view", view);
+		OGLShaderSetUniformMat4(data.main_shader, "model", data.object_matrix);
+		RenderOGLMesh(data.object_mesh);
+		OGLShaderSetUniformVec4(data.main_shader, "aColor", glm::vec4{0.0f});
+		RenderOGLMeshDebug(data.object_mesh);
 	}
 	catch (std::exception e) {
 		std::cerr << "Exception occurred in OGLRender: " << e.what() << std::endl;
