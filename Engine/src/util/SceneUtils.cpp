@@ -132,7 +132,11 @@ void GameObject::Save(pugi::xml_node* node, pugi::xml_node* scene_node) const {
   for (const auto& component : components) {
   	auto componentNode = componentsNode.append_child("Component");
     componentNode.append_attribute("name") = component.name.c_str();
-  } 
+		componentNode.append_attribute("tag") = component.tag.c_str();
+		componentNode.append_attribute("active") = component.isActive;
+			
+		}
+ 
 }
 
 Scene  Scene::Load(std::string path) {
