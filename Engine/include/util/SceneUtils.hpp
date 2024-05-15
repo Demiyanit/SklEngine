@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <string>
-#include <any>
+#include <typeindex>
 #include <renderer/Renderer.hpp>
 
 class GameObject;
@@ -15,18 +15,19 @@ public:
 	glm::vec3 scale;
 };
 
+namespace pugi {
+	class xml_node;
+};
+
 class Component {
 public:
+	virtual std::type_index Type() { return typeid(*this); }
+	virtual void Save(pugi::xml_node* node, pugi::xml_node* scene_node);
 	GameObject* parent;
 	Transform transform;
 	bool isActive = true;
 	std::string name;
 	std::string tag;
-	std::any data;
-};
-
-namespace pugi {
-	class xml_node;
 };
 
 class GameObject {
@@ -38,8 +39,8 @@ public:
 	std::string tag;
 	std::string name;
 	//Both of them should store allocated instances for virtual shit
-	std::vector<GameObject*> children;
-	std::vector<Component *> components;
+	std::vector<std::shared_ptr<GameObject>> children;
+	std::vector<std::shared_ptr<Component>> components;
 
 	void Save(pugi::xml_node* node, pugi::xml_node* scene_node) const;
 private:

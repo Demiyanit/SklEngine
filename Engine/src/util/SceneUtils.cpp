@@ -61,7 +61,11 @@ void Scene::Save(std::string path) {
 		pugi::xml_node objectNode = sceneNode.append_child("GameObject");
 		object.Save(&objectNode, &sceneNode);
 	}
-
+	auto componentsNode = sceneNode.append_child("Components");
+	for (const auto& component : this->scene_components) {
+		auto componentNode = componentsNode.append_child("Component");
+  		component->Save(&componentNode, scene_node);
+	}
 	doc.save_file(path.c_str());
 }
 
@@ -85,7 +89,7 @@ void GameObject::Save(pugi::xml_node* node, pugi::xml_node* scene_node) const {
 		}
 
 		auto Texture = scene_node->find_child_by_attribute("Texture", "uid", std::to_string(this->render_data.tx->uid).c_str());
-		if (Textures.empty()) {
+		if (Texture.empty()) {
 			Texture = scene_node->append_child("Texture");
 			Texture.append_attribute("uid") = this->render_data.tx->uid;
 			Texture.append_child("Path").append_child(pugi::node_pcdata).set_value(this->render_data.tx->path.c_str());
@@ -104,7 +108,6 @@ void GameObject::Save(pugi::xml_node* node, pugi::xml_node* scene_node) const {
 		renderNodeTexture.append_attribute("uid") = this->render_data.tx->uid;
 		auto renderNodeMesh = renderNode.append_child("Mesh");
 		renderNodeMesh.append_attribute("uid") = this->render_data.object_mesh->uid;
-		
 	}
 
 	{
@@ -123,22 +126,34 @@ void GameObject::Save(pugi::xml_node* node, pugi::xml_node* scene_node) const {
 		scale.append_attribute("z") = transform.scale.z;
 	}
 	
+	auto ChildrenNode = node->append_child("Children");
 	for(const auto& child : children) {
-		auto childNode = node->append_child("GameObject");
-		child.Save(&childNode, scene_node);
+		auto childNode = ChildrenNode.append_child("GameObject");
+		child->Save(&childNode, scene_node);
 	}
 	
 	auto componentsNode = node->append_child("Components");
 	for (const auto& component : components) {
-  		auto componentNode = componentsNode.append_child("Component");
-		componentNode.append_attribute("name") = component.name.c_str();
-		componentNode.append_attribute("tag") = component.tag.c_str();
-		componentNode.append_attribute("active") = component.isActive;
+		auto componentNode = componentsNode.append_child("Component");
+  		component->Save(&componentNode, scene_node);
 	}
 }
 
-Scene  Scene::Load(std::string path) {
-	return Scene();
+void Component::Save(pugi::xml_node* node, pugi::xml_node* scene_node) {
+	node->append_attribute("name") = this->name.c_str();
+	node->append_attribute("tag") = this->tag.c_str();
+	node->append_attribute("active") = this->isActive;
+}
+
+
+Scene Scene::Load(std::string path) {
+	pugi::xml_document doc;
+	pugi::xml_parse_result result = doc.load_file(path.c_str());
+	
+	Scene ret;
+	ret.name = sceneNode.attribute("name").as_string();
+	//TODO: Implement the loading of Scene data from XML here
+
 }
 
 Scene* Scene::LoadPTR(std::string path) {
