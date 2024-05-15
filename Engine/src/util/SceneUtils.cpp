@@ -75,7 +75,6 @@ void GameObject::Save(pugi::xml_node* node, pugi::xml_node* scene_node) const {
 	node->append_attribute("active") = isActive;
 	
 	{	
-	
 		auto Shaders = scene_node->find_child([](pugi::xml_node node) { return std::string(node.name()) == "Shaders"; });
 		auto Textures = scene_node->find_child([](pugi::xml_node node) { return std::string(node.name()) == "Textures"; });
 		auto Meshes = scene_node->find_child([](pugi::xml_node node) { return std::string(node.name()) == "Meshes"; });
@@ -83,8 +82,9 @@ void GameObject::Save(pugi::xml_node* node, pugi::xml_node* scene_node) const {
 		if (Shader.empty()) {
 			Shader = Shaders.append_child("Shader");
 			Shader.append_attribute("uid") = this->render_data.main_shader->uid;
+			auto ShaderPaths = Shader.append_child("Paths");
 			for(auto ShaderPath : this->render_data.main_shader->paths) {
-				Shader.append_child("Path").append_child(pugi::node_pcdata).set_value(ShaderPath.c_str());
+				ShaderPaths.append_child("Path").append_child(pugi::node_pcdata).set_value(ShaderPath.c_str());
 			}
 		}
 
