@@ -177,7 +177,7 @@
     <ClInclude Include="include\renderer\Shader.hpp" />
     <ClInclude Include="include\renderer\Texture.hpp" />
     <ClInclude Include="include\util\Event.hpp" />
-    <ClInclude Include="include\util\ImageLoad.hpp" />
+    <ClInclude Include="include\util\Load.hpp" />
     <ClInclude Include="include\util\SceneUtils.hpp" />
     <ClInclude Include="vendor\glew\glew.h" />
     <ClInclude Include="vendor\glew\wglew.h" />

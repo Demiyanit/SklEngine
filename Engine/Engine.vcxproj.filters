@@ -107,7 +107,7 @@
     <ClInclude Include="vendor\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\util\ImageLoad.hpp">
+    <ClInclude Include="include\util\Load.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="vendor\pugixml\pugiconfig.hpp">

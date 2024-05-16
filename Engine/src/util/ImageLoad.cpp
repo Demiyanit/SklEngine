@@ -1,6 +1,6 @@
 #include <stdexcept>
 
-#include <util/ImageLoad.hpp>
+#include <util/Load.hpp>
 #include <stb_image.h>
 
 std::vector<unsigned char> ImageLoader::LoadImage(const std::string &path) {

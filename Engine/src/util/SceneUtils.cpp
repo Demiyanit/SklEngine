@@ -23,8 +23,8 @@ void Scene::RenderGameObject(GameObject* gameObject, glm::mat4 parentMatrix, std
 	renderData.push_back(gameObject->render_data);
 
 	// Recursively render children of the current game object
-	for (GameObject child : gameObject->children) {
-		RenderGameObject(&child, gameObject->render_data.object_matrix, renderData);
+	for (std::shared_ptr<GameObject> child : gameObject->children) {
+		RenderGameObject(child.get(), gameObject->render_data.object_matrix, renderData);
 	}
 }
 
@@ -57,8 +57,9 @@ void Scene::Save(std::string path) {
 		auto Meshes = Engine.append_child("Meshes");
 	}
 	auto sceneNode = doc.append_child("Scene");
+	auto gameObjectsNode = sceneNode.append_child("GameObjects");
 	for (const GameObject object : this->main) {
-		pugi::xml_node objectNode = sceneNode.append_child("GameObject");
+		pugi::xml_node objectNode = gameObjectsNode.append_child("GameObject");
 		object.Save(&objectNode, &sceneNode);
 	}
 	auto componentsNode = sceneNode.append_child("Components");
@@ -75,10 +76,11 @@ void GameObject::Save(pugi::xml_node* node, pugi::xml_node* scene_node) const {
 	node->append_attribute("active") = isActive;
 	
 	{	
-		auto Shaders = scene_node->find_child([](pugi::xml_node node) { return std::string(node.name()) == "Shaders"; });
-		auto Textures = scene_node->find_child([](pugi::xml_node node) { return std::string(node.name()) == "Textures"; });
-		auto Meshes = scene_node->find_child([](pugi::xml_node node) { return std::string(node.name()) == "Meshes"; });
-		auto Shader = scene_node->find_child_by_attribute("Shader", "uid", std::to_string(this->render_data.main_shader->uid).c_str());
+		auto EngineNode = scene_node->parent().child("Engine");
+		auto Shaders  = EngineNode.child("Shaders");
+		auto Textures = EngineNode.child("Textures");
+		auto Meshes   = EngineNode.child("Meshes");
+		auto Shader = Shaders.find_child_by_attribute("Shader", "uid", std::to_string(this->render_data.main_shader->uid).c_str());
 		if (Shader.empty()) {
 			Shader = Shaders.append_child("Shader");
 			Shader.append_attribute("uid") = this->render_data.main_shader->uid;
@@ -87,25 +89,28 @@ void GameObject::Save(pugi::xml_node* node, pugi::xml_node* scene_node) const {
 				ShaderPaths.append_child("Path").append_child(pugi::node_pcdata).set_value(ShaderPath.c_str());
 			}
 		}
-
-		auto Texture = scene_node->find_child_by_attribute("Texture", "uid", std::to_string(this->render_data.tx->uid).c_str());
+		if(this->render_data.tx) {
+		auto Texture = Textures.find_child_by_attribute("Texture", "uid", std::to_string(this->render_data.tx->uid).c_str());
 		if (Texture.empty()) {
-			Texture = scene_node->append_child("Texture");
+			Texture = Textures.append_child("Texture");
 			Texture.append_attribute("uid") = this->render_data.tx->uid;
 			Texture.append_child("Path").append_child(pugi::node_pcdata).set_value(this->render_data.tx->path.c_str());
 		}
+		}
 
-		auto Mesh = scene_node->find_child_by_attribute("Mesh", "uid", std::to_string(this->render_data.object_mesh->uid).c_str());
+		auto Mesh = Meshes.find_child_by_attribute("Mesh", "uid", std::to_string(this->render_data.object_mesh->uid).c_str());
 		if (Mesh.empty()) {
-			Mesh = scene_node->append_child("Mesh");
+			Mesh = Meshes.append_child("Mesh");
 			Mesh.append_attribute("uid") = this->render_data.object_mesh->uid;
 			Mesh.append_child("Path").append_child(pugi::node_pcdata).set_value(this->render_data.object_mesh->path.c_str());
 		}
 		auto renderNode = node->append_child("RenderData");
 		auto renderNodeShader = renderNode.append_child("Shader");
 		renderNodeShader.append_attribute("uid") = this->render_data.main_shader->uid;
-		auto renderNodeTexture = renderNode.append_child("Texture");
-		renderNodeTexture.append_attribute("uid") = this->render_data.tx->uid;
+		if (this->render_data.tx) {
+			auto renderNodeTexture = renderNode.append_child("Texture");
+			renderNodeTexture.append_attribute("uid") = this->render_data.tx->uid;
+		}
 		auto renderNodeMesh = renderNode.append_child("Mesh");
 		renderNodeMesh.append_attribute("uid") = this->render_data.object_mesh->uid;
 	}
@@ -149,11 +154,11 @@ void Component::Save(pugi::xml_node* node, pugi::xml_node* scene_node) {
 Scene Scene::Load(std::string path) {
 	pugi::xml_document doc;
 	pugi::xml_parse_result result = doc.load_file(path.c_str());
-	
+	auto sceneNode = doc.child("Scene");
 	Scene ret;
 	ret.name = sceneNode.attribute("name").as_string();
-	//TODO: Implement the loading of Scene data from XML here
-
+	
+	return ret;
 }
 
 Scene* Scene::LoadPTR(std::string path) {

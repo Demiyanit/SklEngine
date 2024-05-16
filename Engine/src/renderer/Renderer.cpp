@@ -6,7 +6,7 @@ void (*Renderer::FinishRender)() =0;
 void (*Renderer::Render)(glm::mat4 projection, glm::mat4 view, RenderData data)  =0;
 void (*Renderer::SetViewPort)  (int x, int y, int width, int height)=0;
 void (*Renderer::ClearColor)(glm::vec4 color);
-Mesh (*Renderer::CreateMesh)(std::vector<float> vertices, std::vector<unsigned int> indices);
+Mesh (*Renderer::CreateMesh)(std::string path, std::vector<float>* vertices, std::vector<unsigned int>* indices);
 void (*Renderer::DestroyMesh)(Mesh* mesh);
 Shader (*Renderer::CreateShader)(std::vector<std::string> paths);
 void (*Renderer::DestroyShader)(Shader* shader);

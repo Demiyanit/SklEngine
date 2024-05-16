@@ -11,7 +11,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glew/glew.h>
 #include <iostream>
-#include <util/ImageLoad.hpp>
+#include <util/Load.hpp>
 
 struct ShaderInternal {
 	unsigned int id;
@@ -35,8 +35,6 @@ void InitMain();
 void ResizeCallback(WindowResizeEvent* e) {
 	
 }
-
-
 
 void OGLInit() {
 	void* ctx = InitGlew();
@@ -121,6 +119,8 @@ unsigned int LoadShader(std::string path, unsigned int type) {
 	return shader;
 }
 
+static int ShaderUID = 0;
+
 Shader CreateOGLShader(std::vector<std::string> paths) {
 	std::cout << "CreateOGLShader" << std::endl;
 	unsigned int program = glCreateProgram();
@@ -162,39 +162,57 @@ Shader CreateOGLShader(std::vector<std::string> paths) {
 	Shader ret = Shader();
 	ret.data = new ShaderInternal();
 	((ShaderInternal*)ret.data)->id = program;
+	ret.uid = ShaderUID;
+	ShaderUID++;
+	ret.paths = paths;
 	return ret;
 }
 
-Mesh CreateOGLMesh(std::vector<float> vertices, std::vector<unsigned int> indices) {
-  std::cout << "CreateOGLMesh" << std::endl;
-  std::cout << "vertices: " << vertices.size() << std::endl;
-  std::cout << "indices: " << indices.size() << std::endl;
-  Mesh mesh = Mesh();
-  MeshInternal* internal = new MeshInternal();
+static int MeshUID = 0;
 
-  glGenVertexArrays(1, &internal->VAO);
-  std::cout << "VAO: " << internal->VAO << std::endl;
-  glBindVertexArray(internal->VAO);
+Mesh CreateOGLMesh(std::string path, std::vector<float>* _vertices, std::vector<unsigned int>* _indices) {
+	std::vector<float>* vertices = _vertices;
+	std::vector<unsigned int>* indices = _indices;
+	Obj a;
+	if (!_vertices && !_indices) {
+		a.LoadFromObjFile(path);
+		vertices = &a.vertices;
+		indices =  &a.indices;
+	} 
+	std::cout << "CreateOGLMesh" << std::endl;
+	std::cout << "vertices: " << vertices->size() << std::endl;
+	std::cout << "indices: " << indices->size() << std::endl;
+	Mesh mesh = Mesh();
+	MeshInternal* internal = new MeshInternal();
 
-  glGenBuffers(1, &internal->VBO);
-  std::cout << "VBO: " << internal->VBO << std::endl;
-  glBindBuffer(GL_ARRAY_BUFFER, internal->VBO);
-  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+	glGenVertexArrays(1, &internal->VAO);
+	std::cout << "VAO: " << internal->VAO << std::endl;
+	glBindVertexArray(internal->VAO);
 
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glGenBuffers(1, &internal->VBO);
+	std::cout << "VBO: " << internal->VBO << std::endl;
+	glBindBuffer(GL_ARRAY_BUFFER, internal->VBO);
+	glBufferData(GL_ARRAY_BUFFER, vertices->size() * sizeof(float), vertices->data(), GL_STATIC_DRAW);
 
-  glGenBuffers(1, &internal->EBO);
-  std::cout << "EBO: " << internal->EBO << std::endl;
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, internal->EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-  glBindVertexArray(0);
-  mesh.indices_count = indices.size();
-  mesh.indices = indices.data();
-  mesh.data = internal;
-  return mesh;
+	glGenBuffers(1, &internal->EBO);
+	std::cout << "EBO: " << internal->EBO << std::endl;
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, internal->EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices->size() * sizeof(unsigned int), indices->data(), GL_STATIC_DRAW);
+
+	glBindVertexArray(0);
+	mesh.indices_count = indices->size();
+	mesh.indices = indices->data();
+	mesh.data = internal;
+	mesh.path = path;
+	mesh.uid = MeshUID;
+	MeshUID++;
+	return mesh;
 }
+
+static int TextureUID = 0;
 
 Texture CreateOGLTexture(std::string path) {
 	Texture texture = Texture();
@@ -226,6 +244,9 @@ Texture CreateOGLTexture(std::string path) {
 	}
 
 	texture.data = internal;
+	texture.path = path;
+	texture.uid = TextureUID;
+	TextureUID++;
 	return texture;
 }
 

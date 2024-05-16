@@ -7,7 +7,7 @@ void OGLStartRender();
 void OGLRender(glm::mat4 projection, glm::mat4 view, RenderData data);
 void OGLFinishRender();
 Shader  CreateOGLShader(std::vector<std::string> paths);
-Mesh    CreateOGLMesh(std::vector<float> vertices, std::vector<unsigned int> indices);
+Mesh    CreateOGLMesh(std::string path, std::vector<float>* vertices, std::vector<unsigned int>* indices);
 Texture CreateOGLTexture(std::string path);
 void   DestroyOGLShader(Shader* shader);
 void   DestroyOGLMesh(Mesh* mesh);
