@@ -10,6 +10,7 @@ void* Window::wnd_handle = nullptr;
 bool Window::shouldclose = false;
 bool Window::initialized = false;
 double Timer::frequency = 0.0f;
+void* Window::renderer_specific_data = nullptr;
 LARGE_INTEGER start;
 #define GET_X_LPARAM(lParam) ((int)(short)LOWORD(lParam))
 #define GET_Y_LPARAM(lParam) ((int)(short)HIWORD(lParam))

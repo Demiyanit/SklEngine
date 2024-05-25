@@ -18,4 +18,6 @@ public:
 	std::string ApplicationName = "";
 	int width = -1;
 	int height= -1;
+
+	Engine* engine;
 };

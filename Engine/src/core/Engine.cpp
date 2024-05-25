@@ -27,6 +27,7 @@ void InitShutdownSequence(EngineCloseEvent* e) {
 
 void Engine::Initialize(IApplication* inst) {
 	Engine::application_instance = inst;
+	inst->engine = this;
 	Timer::Initialize();
 	try {
 		Window::Init(inst->ApplicationName.c_str(), inst->width, inst->height);

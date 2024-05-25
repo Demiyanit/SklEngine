@@ -1,9 +1,19 @@
-#include "VulkanRenderer.h"
-
+#include "VulkanDevice.h"
 #include <iostream>
 #include <cstdint>
+namespace Skl {
+static VulkanContext* ctx;
 
-void Initialize(IApplication* app) {
+VkBool32 SklEngineVkCallback(
+	VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+  VkDebugUtilsMessageTypeFlagsEXT messageTypes,
+  const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+  void* pUserData) {
+  std::cerr << "Vulkan Error: " << pCallbackData->pMessage << std::endl;
+  return VK_TRUE;
+}
+
+void Initialize(IApplication* app, void* window_handle) {
 #if _DEBUG
 	std::cout << "[Renderer]: Vulkan Renderer [DEBUG VERSION]" << std::endl;
 #endif // _DEBUG
@@ -13,7 +23,7 @@ void Initialize(IApplication* app) {
 	
 	uint32_t api_version = vk::enumerateInstanceVersion();
 	
-	VkApplicationInfo app_info = { VK_STRUCTURE_TYPE_APPLICATION_INFO };
+	vk::ApplicationInfo app_info;
 	app_info.apiVersion = api_version;
 	//TODO: Update
 	app_info.applicationVersion = VK_MAKE_API_VERSION(0, 0, 0, 1);
@@ -21,7 +31,7 @@ void Initialize(IApplication* app) {
 	app_info.pApplicationName   = app->ApplicationName.c_str();
 	app_info.pEngineName		= "SklEngine";
 	
-	VkInstanceCreateInfo instance_info = { VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO };
+	vk::InstanceCreateInfo instance_info;
 	instance_info.pApplicationInfo = &app_info;
 
 	std::vector<const char*> required_extensions;
@@ -47,23 +57,77 @@ void Initialize(IApplication* app) {
 	}
 #endif // _DEBUG
 
-	for (uint32_t i = 0; i < required_extensions.size(); ++i) {
+	for (const char* ext : required_extensions) {
 		bool found = false;
-		for (uint32_t j = 0; j < extension_props.size(); ++j) {
-			if (std::string(required_extensions[i]) == extension_props[j].extensionName) {
+		std::string ext_str = ext;
+		for (vk::ExtensionProperties ext_prop : extension_props) {
+			if (ext_str == ext_prop.extensionName) {
 				found = true;
 #if _DEBUG
-				std::cout << "Required extension found: " << required_extensions[i] << std::endl;
+				std::cout << "[Renderer]: Required extension found: " << ext_str << std::endl;
 #endif // _DEBUG
 				break;
 			}
 		}
 		if (!found) {
-			throw new std::runtime_error("Required extension is missing: " + std::string(required_extensions[i]));
+			throw new std::runtime_error("Required extension is missing: " + ext_str);
 		}
 	}
 
-	VkInstance instance = vk::createInstance(instance_info);
+#if _DEBUG
+	std::cout << "[Renderer]: Getting validation layers" << std::endl;
+	std::vector<const char*> reqiured_layers;
+	reqiured_layers.push_back("VK_LAYER_KHRONOS_validation");
+	reqiured_layers.push_back("VK_LAYER_LUNARG_api_dump");
+	std::vector<vk::LayerProperties> layer_props = vk::enumerateInstanceLayerProperties();
+	for (const char* layer : reqiured_layers) {
+		bool found = false;
+		std::string layer_str = layer;
+		for (vk::LayerProperties layer_prop : layer_props) {
+			if (layer_str == layer_prop.layerName) {
+				found = true;
+				std::cout << "[Renderer]: Required layer found: " << layer_str << std::endl;
+			}
+		}
+		if (!found) {
+			throw new std::runtime_error("Required layer is missing: " + layer_str);
+		}
+	}
+
+	instance_info.enabledLayerCount = reqiured_layers.size();
+	instance_info.ppEnabledLayerNames = reqiured_layers.data();
+#endif // _DEBUG
+
+#if _DEBUG
+	std::cout << "[Renderer]: Creating instance..." << std::endl;
+#endif
+	vk::Instance instance = vk::createInstance(instance_info);
+#if _DEBUG
+	std::cout << "[Renderer]: Instance created successfully" << std::endl;
+#endif
+	
+#if _DEBUG
+	std::cout << "[Renderer]: Initializing Vulkan logger..." << std::endl;
+	vk::DebugUtilsMessengerCreateInfoEXT DutilMsgInfo;
+	vk::DebugUtilsMessageSeverityFlagsEXT MessageFlags;
+	MessageFlags |= vk::DebugUtilsMessageSeverityFlagBitsEXT::eError;
+	MessageFlags |= vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning;
+	MessageFlags |= vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo;
+	MessageFlags |= vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose;
+	DutilMsgInfo.messageSeverity = MessageFlags;
+	DutilMsgInfo.messageType =
+		vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+		vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
+		vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
+		vk::DebugUtilsMessageTypeFlagBitsEXT::eDeviceAddressBinding;
+	DutilMsgInfo.pfnUserCallback = SklEngineVkCallback;
+	
+	vk::UniqueDebugUtilsMessengerEXT DebugMessenger = instance.createDebugUtilsMessengerEXTUnique(DutilMsgInfo);
+	std::cout << "[Renderer]: Vulkan logger initialized successfully" << std::endl;
+#endif // _DEBUG
+	ctx = new VulkanContext();
+	CreateVulkanSurface(app, window_handle);
+	ctx->main_device = new VulkanDevice();
 }
 
 void Resize(int width, int height) {
@@ -85,3 +149,4 @@ void EndFrame() {
 void ShutDown() {
 
 }
+};

@@ -17,10 +17,12 @@ public:
 	static bool ShouldClose() { return shouldclose; }
 	static void SetShouldClose(bool should) { shouldclose = should; }
 	static void LockCursor(bool lock);
-
+	
 	static void* wnd_handle;
 private:
 	static bool shouldclose;
 	static bool initialized;
+	friend class Engine;
 	friend class Renderer;
+	static void* renderer_specific_data;
 };

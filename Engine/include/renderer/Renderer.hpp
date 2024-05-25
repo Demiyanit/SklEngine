@@ -18,11 +18,11 @@ class Renderer {
 public:
 	//Keep it cuz BRUH
 	Library RendererLibrary;
-	using InitializeCallback = void(*)(IApplication* app);
+	using InitializeCallback = void(*)(IApplication* app, void* window_handle);
 	using VoidCallback =   void(*)();
 	using ResizeCallback = void(*)(int width, int height);
 	using RenderCallback = void(*)(RenderData* data);
-	void (*Initialize)(IApplication* app);
+	void (*Initialize)(IApplication* app, void* window_handle);
 	
 	void (*Resize)(int width, int height);
 
