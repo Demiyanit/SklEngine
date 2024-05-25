@@ -4,7 +4,7 @@
 #include <string>
 #include <typeindex>
 #include <renderer/Renderer.hpp>
-
+#include <glm/glm.hpp>
 class GameObject;
 
 class Transform {
@@ -15,18 +15,15 @@ public:
 	glm::vec3 scale;
 };
 
-namespace pugi {
-	class xml_node;
-};
-
 class Component {
 public:
 	virtual std::type_index Type() { return typeid(*this); }
-	virtual void Save(pugi::xml_node* node, pugi::xml_node* scene_node);
+	//virtual void Save(pugi::xml_node* node, pugi::xml_node* scene_node);
 	GameObject* parent;
 	Transform transform;
 	bool isActive = true;
 	std::string name;
+	std::string typeID;
 	std::string tag;
 };
 
@@ -42,11 +39,12 @@ public:
 	std::vector<std::shared_ptr<GameObject>> children;
 	std::vector<std::shared_ptr<Component>> components;
 
-	void Save(pugi::xml_node* node, pugi::xml_node* scene_node) const;
+	//void Save(pugi::xml_node* node, pugi::xml_node* scene_node) const;
 private:
 	friend class Scene;
 };
 
+/*
 class Camera {
 public:
 	Transform transform;
@@ -64,12 +62,13 @@ public:
 	std::string name;
 	std::vector<RenderData> ConstructRenderData();
 
-	void Save(std::string path);
-	static Scene  Load   (std::string path);
-	static Scene* LoadPTR(std::string path);
+	//void Save(std::string path);
+	//static Scene  Load   (std::string path);
+	//static Scene* LoadPTR(std::string path);
 	std::vector<GameObject> main;
 	std::vector<std::shared_ptr<Component>> scene_components;
 private:
 	void RenderGameObject(GameObject* gameObject, glm::mat4 parentMatrix, std::vector<RenderData>& renderData);
 	glm::mat4 CalculateTransformMatrix(GameObject* gameObject);
 };
+*/

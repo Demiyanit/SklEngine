@@ -37,3 +37,7 @@ public:
 	int width;
 	int height;
 };
+
+class EngineUpdateEvent : public Event {
+
+};

@@ -1,5 +1,6 @@
 #if defined(_WIN32) && defined(_WIN64)
 #include <platform/Window.hpp>
+#include <platform/Timer.hpp>
 #include <Windows.h>
 #include <stdexcept>
 #include <core/EngineEvents.hpp>
@@ -8,11 +9,33 @@
 void* Window::wnd_handle = nullptr;
 bool Window::shouldclose = false;
 bool Window::initialized = false;
-
+double Timer::frequency = 0.0f;
+LARGE_INTEGER start;
 #define GET_X_LPARAM(lParam) ((int)(short)LOWORD(lParam))
 #define GET_Y_LPARAM(lParam) ((int)(short)HIWORD(lParam))
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+void Timer::Sleep(unsigned long duration) {
+	Sleep(duration);
+}
+
+void Timer::Initialize() {
+	LARGE_INTEGER frequency;
+	QueryPerformanceFrequency(&frequency);
+	Timer::frequency = 1.0f / frequency.QuadPart;
+	QueryPerformanceCounter(&start);
+}
+
+double Timer::GetAbsoluteTime() {
+	if (!Timer::frequency) {
+		Timer::Initialize();
+	}
+
+	LARGE_INTEGER now_time;
+	QueryPerformanceCounter(&now_time);
+	return (double)now_time.QuadPart * Timer::frequency;
+}
 
 void Window::Init(const char* name, int width, int height) {
 	if (Window::initialized) return;

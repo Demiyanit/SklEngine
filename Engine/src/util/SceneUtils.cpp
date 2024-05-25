@@ -6,7 +6,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/euler_angles.hpp>
-
+#include <glm/glm.hpp>
+/*
 std::vector<RenderData> Scene::ConstructRenderData() {
 	std::vector<RenderData> renderData;
 	for (GameObject gameObject : this->main) {
@@ -44,7 +45,8 @@ glm::mat4 Scene::CalculateTransformMatrix(GameObject* gameObject) {
 
   return glm::transpose(rotationMatrix * objectMatrix);
 }
-
+*/
+/*
 void Scene::Save(std::string path) {
 	pugi::xml_document doc;
 	auto decl = doc.append_child(pugi::node_declaration);
@@ -146,6 +148,7 @@ void GameObject::Save(pugi::xml_node* node, pugi::xml_node* scene_node) const {
 
 void Component::Save(pugi::xml_node* node, pugi::xml_node* scene_node) {
 	node->append_attribute("name") = this->name.c_str();
+	node->append_attribute("typeID") = this->typeID.c_str();
 	node->append_attribute("tag") = this->tag.c_str();
 	node->append_attribute("active") = this->isActive;
 }
@@ -154,6 +157,9 @@ void Component::Save(pugi::xml_node* node, pugi::xml_node* scene_node) {
 Scene Scene::Load(std::string path) {
 	pugi::xml_document doc;
 	pugi::xml_parse_result result = doc.load_file(path.c_str());
+	if (result.status != pugi::status_ok) {
+		throw new std::runtime_error(result.description());
+	}
 	auto sceneNode = doc.child("Scene");
 	Scene ret;
 	ret.name = sceneNode.attribute("name").as_string();
@@ -167,7 +173,8 @@ Scene* Scene::LoadPTR(std::string path) {
 	*s = sc;
 	return s;
 }
-
+*/
+/*
 glm::mat4 Camera::CalculateViewMatrix() {
     glm::mat4 rotationMatrix = glm::eulerAngleXYZ(
       glm::radians(-this->transform.rotation.x),
@@ -217,3 +224,4 @@ void Camera::Render(std::vector<RenderData> data) {
 	}
 	
 }
+*/

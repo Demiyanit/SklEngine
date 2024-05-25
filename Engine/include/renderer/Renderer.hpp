@@ -2,42 +2,41 @@
 
 #include <vector>
 #include <string>
-
+#include <core/Application.hpp>
 #include <renderer/Shader.hpp>
-#include <renderer/Mesh.hpp>
-#include <renderer/Texture.hpp>
-#include <glm/glm.hpp>
+#include <renderer/ShaderPacket.hpp>
+#include <renderer/Model.hpp>
+#include <util/Load.hpp>
 
 class RenderData {
 public:
-	Shader* main_shader;
-	Mesh*   object_mesh;
-	Texture*tx;
-	glm::mat4 object_matrix;
-	glm::vec4 color = glm::vec4(0.0f);
-};
-
-enum RendererType {
-	OpenGL,
-	Dx,
-	Vulkan
+	IShaderPacket* shader_packet;
+	IModel* model;
 };
 
 class Renderer {
 public:
-	static void Get(RendererType renderer);
-	static void (*Initialize)();
-	static void (*SetViewPort)(int x, int y , int width, int height);
-	static void (*ClearColor)(glm::vec4 color);
-	static void (*StartRender)();
-	static void (*Render)(glm::mat4 projection, glm::mat4 view, RenderData data);
-	static void (*FinishRender)();
-	static Shader  (*CreateShader) (std::vector<std::string> paths);
-	static void    (*DestroyShader)(Shader* shader);
-	static Texture (*CreateTexture)(std::string path);
-	static Mesh    (*CreateMesh)   (std::string path, std::vector<float>* vertices, std::vector<unsigned int>* indices);
-	static void    (*DestroyMesh)  (Mesh* mesh);
-	static void    (*DestroyTexture)(Texture* texture);
+	//Keep it cuz BRUH
+	Library RendererLibrary;
+	using InitializeCallback = void(*)(IApplication* app);
+	using VoidCallback =   void(*)();
+	using ResizeCallback = void(*)(int width, int height);
+	using RenderCallback = void(*)(RenderData* data);
+	void (*Initialize)(IApplication* app);
 	
-	static glm::mat4 proj;
+	void (*Resize)(int width, int height);
+
+	void (*BeginFrame)();
+	void (*Render)(RenderData* data);
+	void (*EndFrame)();
+
+	//Virtual destructor would work better but BRUH lol
+	void (*Shutdown)();
+	void* internal_dara = nullptr;
+public:
+	IModel*			(*LoadModel)(std::string path);
+	IShader*		(*LoadAndCompileShader)(std::string path);
+	IShaderPacket*	(*ConstructShaderPacket)(std::vector<IShader> shaders);
 };
+
+Renderer* RendererGet(std::string renderer_dll_path);

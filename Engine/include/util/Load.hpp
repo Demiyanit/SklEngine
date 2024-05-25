@@ -10,6 +10,25 @@ public:
 	static std::vector<unsigned char> LoadImage(const std::string& path);
 };
 
+class Library {
+public:
+    void* handle;
+    std::string name;
+    ~Library();
+
+    template<typename T>
+    T GetFunction(const std::string& name) {
+        return (T)GetFPtr(name);
+    }
+
+    void* GetFPtr(const std::string& name);
+};
+
+class LibraryLoader {
+public:
+    static Library Load(const std::string& path);
+};
+
 class Obj {
 public:
     std::vector<float> vertices;

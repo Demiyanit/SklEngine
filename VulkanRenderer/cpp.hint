@@ -1,0 +1,2 @@
+#define VULKANRENDERER_API __declspec(dllexport)
+#define VULKANRENDERER_API __declspec(dllimport)

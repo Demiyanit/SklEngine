@@ -5,11 +5,9 @@
 
 class Renderer;
 
-class Shader {
+class IShader {
 public:
 	int uid;
-	std::vector<std::string> paths;
-	void* data;
 private:
 	friend class Renderer;
 };

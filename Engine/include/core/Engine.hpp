@@ -7,15 +7,17 @@
 #endif
 
 class IApplication;
-class IRenderer;
+class Renderer;
 
 class SKLC_API Engine {
 private:
 	static IApplication* application_instance;
+	static Engine* instance;
 	friend class Renderer;
 	friend class Event;
+	friend Engine* GetEngineInstance();
 public:
-
+	Renderer* renderer = nullptr;
 	void Initialize(IApplication* inst);
 	int  Run();
 	void Shutdown();
