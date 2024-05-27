@@ -1,5 +1,6 @@
-#include "VulkanDevice.h"
 #include <iostream>
+#include <iomanip>
+#include "VulkanRenderer.h"
 namespace Skl {
 VulkanDevice::VulkanDevice() {
 	
@@ -33,7 +34,7 @@ vk::PhysicalDevice VulkanDevice::SelectPhysicalDevice() {
 		vk::PhysicalDeviceMemoryProperties mem_props;
 		mem_props = PhysicalDevice.getMemoryProperties();
 #if _DEBUG
-		std::cout << "Evaluating device: " << props.deviceName << ", ID: " << props.deviceID << std::endl;
+		std::cout << "[Renderer]: Evaluating device: " << props.deviceName << ", ID: " << props.deviceID << std::endl;
 #endif // _DEBUG
 
 		bool local_host_visible = false;
@@ -47,9 +48,56 @@ vk::PhysicalDevice VulkanDevice::SelectPhysicalDevice() {
 			}
 		}
 
-		
 		VulkanPhysicalDeviceQueueFamilyInfo queue_info;
-
+		bool result = PhysicalDeviceMeetsRequirements(
+			PhysicalDevice,
+			ctx->surface,
+			props,
+			features,
+			req,
+			queue_info,
+			this->swapchain_support
+		);
+		if (result) {
+			this->api_major = vk::versionMajor(props.apiVersion);
+			this->api_minor = vk::versionMinor(props.apiVersion);
+			this->api_patch = vk::versionPatch(props.apiVersion);
+#if _DEBUG
+			std::cout << "[Renderer]: Selected device: " << props.deviceName << std::endl;
+			//Debug GPU info
+			switch (props.deviceType) {
+			case vk::PhysicalDeviceType::eOther: {
+				std::cout << "[Renderer]: Physical device type: Unknown" << std::endl;
+			}break;
+			//NOTE: For now should NEVER happen
+			case vk::PhysicalDeviceType::eIntegratedGpu: {
+				std::cout << "[Renderer]: Physical device type: Integrated GPU" << std::endl;
+			}break;
+			case vk::PhysicalDeviceType::eDiscreteGpu: {
+				std::cout << "[Renderer]: Physical device type: Discrete GPU" << std::endl;
+			}break;
+			case vk::PhysicalDeviceType::eVirtualGpu: {
+				std::cout << "[Renderer]: Physical device type: Virtual GPU" << std::endl;
+			}break;
+			case vk::PhysicalDeviceType::eCpu: {
+				//NOTE: I'm allowed to make jokes in my own engine from time to time
+				std::cout << "[Renderer]: Physical device type: CPU... Wtf?" << std::endl;
+			}break;
+			}
+			//Driver and vulkan info
+			std::cout << "[Renderer]: Device driver info: " << driver_props.driverInfo << std::endl;
+			std::cout << "[Renderer]: Vulkan API version: " << this->api_major << "." << "." << api_minor << "." << api_patch << std::endl;
+			//Memory info
+			for (auto mem : mem_props.memoryHeaps) {
+				float mem_size_gib = mem.size / (1024.0f * 1024.0f * 1024.0f);
+				if (mem.flags & vk::MemoryHeapFlagBits::eDeviceLocal) {
+					std::cout << "Local Device memory: " << std::fixed << std::setprecision(3) << mem_size_gib << std::endl;
+				} else {
+					std::cout << "Shared System memory: " << std::fixed << std::setprecision(3) << mem_size_gib << std::endl;
+				}
+			}
+#endif // _DEBUG
+		}
 	}
 }
 
@@ -120,6 +168,72 @@ bool VulkanDevice::PhysicalDeviceMeetsRequirements(vk::PhysicalDevice device, vk
 				}
 			}
 		}
+
+		std::cout << "[Renderer]: graphics_family_index: " << (out_queue_info.graphics_family_index != -1 ? "yes" : "no") << " | ";
+		std::cout << "present_family_index: " << (out_queue_info.present_family_index != -1 ? "yes" : "no") << " | ";
+		std::cout << "compute_family_index: " << (out_queue_info.compute_family_index != -1 ? "yes" : "no") << " | ";
+		std::cout << "transfer_family_index: " << (out_queue_info.transfer_family_index != -1 ? "yes" : "no") << " | ";
+		std::cout << "deviceName: " << properties.deviceName << std::endl;
+	
+		if (
+			(!req.graphics || (req.graphics && out_queue_info.graphics_family_index != -1)) &&
+			(!req.present || (req.present && out_queue_info.present_family_index != -1)) &&
+			(!req.compute || (req.compute && out_queue_info.compute_family_index != -1)) &&
+			(!req.transfer || (req.transfer && out_queue_info.transfer_family_index != -1))) {
+#ifdef _DEBUG
+			std::cout << "[Renderer]: Device meets queue requirements." << std::endl;
+			std::cout << "Graphics Family Index: " << out_queue_info.graphics_family_index << std::endl;
+			std::cout << "Present Family Index: " << out_queue_info.present_family_index << std::endl;
+			std::cout << "Transfer Family Index: " << out_queue_info.transfer_family_index << std::endl;
+			std::cout << "Compute Family Index: " << out_queue_info.compute_family_index << std::endl;
+#endif // _DEBUG
+
+			//Query swapchain support
+			QuerySwapChainSupport(device, surface, out_swapchain_info);
+			if (out_swapchain_info.formats.size() < 1 || out_swapchain_info.present_modes.size() < 1) {
+#ifdef _DEBUG
+				std::cout << "[Renderer]: Required swapchain support not present, skipping device." << std::endl;
+#endif // _DEBUG
+				return false;
+			}
+
+			//Device extensions
+			if (req.ext_names.size() > 0) {
+				auto ext_props = device.enumerateDeviceExtensionProperties();
+				for (auto ext : req.ext_names) {
+					bool found = false;
+					for (auto av_ext : ext_props) {
+						if (av_ext.extensionName == ext) {
+							found = true;
+							break;
+						}
+					}
+					if (!found) {
+#if _DEBUG
+						std::cout << "[Renderer]: Required extension not found: " << ext << ", skipping device" << std::endl;
+#endif // _DEBUG
+						return false;
+					}
+				}
+			}
+		}
+		if (req.sampler_anisotropy && !features.samplerAnisotropy) {
+#if _DEBUG
+			std::cout << "[Renderer]: Device doesn't support sampler anisotrophy, skipping..." << std::endl;
+#endif // _DEBUG
+			return false;
+		}
+		return true;
 	}
 }
-};
+void Skl::VulkanDevice::QuerySwapChainSupport(vk::PhysicalDevice device, vk::SurfaceKHR surface, VulkanSwapchainSupportInfo& info) {
+	info.caps = device.getSurfaceCapabilitiesKHR(surface);
+	info.formats = device.getSurfaceFormatsKHR(surface);
+	info.present_modes = device.getSurfacePresentModesKHR(surface);
+}
+
+
+
+
+
+};//namespace Skl

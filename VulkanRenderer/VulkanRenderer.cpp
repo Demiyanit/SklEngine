@@ -1,8 +1,8 @@
-#include "VulkanDevice.h"
+#include "VulkanRenderer.h"
 #include <iostream>
 #include <cstdint>
 namespace Skl {
-static VulkanContext* ctx;
+VulkanContext* ctx;
 
 VkBool32 SklEngineVkCallback(
 	VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -20,7 +20,6 @@ void Initialize(IApplication* app, void* window_handle) {
 
 	if (app == nullptr) 
 		throw new std::runtime_error("Tried to initialize renderer with NULL application instance");
-	
 	uint32_t api_version = vk::enumerateInstanceVersion();
 	
 	vk::ApplicationInfo app_info;
@@ -47,7 +46,7 @@ void Initialize(IApplication* app, void* window_handle) {
 	instance_info.enabledExtensionCount  = required_extensions.size();
 	instance_info.ppEnabledExtensionNames = required_extensions.data();
 
-	std::vector<vk::ExtensionProperties> extension_props = vk::enumerateInstanceExtensionProperties(nullptr, nullptr);
+	std::vector<vk::ExtensionProperties> extension_props = vk::enumerateInstanceExtensionProperties();
 	if (extension_props.size() == 0) 
 		throw new std::runtime_error("Could not retrieve the list of Vulkan extension properties");
 #if _DEBUG
@@ -122,7 +121,7 @@ void Initialize(IApplication* app, void* window_handle) {
 		vk::DebugUtilsMessageTypeFlagBitsEXT::eDeviceAddressBinding;
 	DutilMsgInfo.pfnUserCallback = SklEngineVkCallback;
 	
-	vk::UniqueDebugUtilsMessengerEXT DebugMessenger = instance.createDebugUtilsMessengerEXTUnique(DutilMsgInfo);
+	ctx->DebugMessenger = instance.createDebugUtilsMessengerEXTUnique(DutilMsgInfo, nullptr, vk::DispatchLoaderDynamic());
 	std::cout << "[Renderer]: Vulkan logger initialized successfully" << std::endl;
 #endif // _DEBUG
 	ctx = new VulkanContext();

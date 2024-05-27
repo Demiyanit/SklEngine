@@ -15,6 +15,7 @@ public:
 /**
 * Application config data
 */
+
 	std::string ApplicationName = "";
 	int width = -1;
 	int height= -1;
